@@ -10,18 +10,6 @@ Install with [npm](https://npmjs.org/package/lemon-js):
 import { Model, model, property } from 'lemon-js';
 
 @model
-export default class Post extends TypedModel {
-	@property public title: string;
-	@property public body: string;
-
-	@property public creator: User;
-
-	public static findByTitle(title: string): Query<Post> {
-		return this.findOne({ title });
-	}
-}
-
-@model
 export default class User extends TypedModel {
 	@property public age: number;
 	@property public createdAt: Date;
@@ -38,6 +26,18 @@ export default class User extends TypedModel {
 
 	public static findByEmail(email: string): Promise<User> {
 		return this.findOne({ email });
+	}
+}
+
+@model
+export default class Post extends TypedModel {
+	@property public title: string;
+	@property public body: string;
+
+	@property public creator: User;
+
+	public static findByTitle(title: string): Query<Post> {
+		return this.findOne({ title });
 	}
 }
 
