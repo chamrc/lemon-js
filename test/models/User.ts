@@ -1,9 +1,9 @@
 import { Query } from 'mongoose';
-import { Model, model, property, Ref } from '../../index';
+import { model, property, Ref, TypedModel } from '../../lib';
 import Post from './Post';
 
 @model
-export default class User extends Model {
+export default class User extends TypedModel {
 	@property public age: number;
 	@property public createdAt: Date;
 	@property public email: string;

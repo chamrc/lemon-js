@@ -16,7 +16,6 @@ describe('Model relations', () => {
 			creator: user._id,
 			title: 'Post 1',
 		});
-
 		await post.save();
 	});
 
@@ -26,9 +25,9 @@ describe('Model relations', () => {
 	});
 
 	it('should allow to populate related models', async () => {
-		const post = await Post.findByTitle('Post 1').populate('creator');
+		const post = await Post.findByTitle('Post 1').populate('creator').exec();
+
 		expect(post.title).to.be.equal('Post 1');
-		expect((post.creator as User).displayName)
-			.to.be.equal('User 1 <user1@example.com>');
+		expect(post.creator.displayName).to.be.equal('User 1 <user1@example.com>');
 	});
 });

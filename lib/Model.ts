@@ -1,231 +1,226 @@
 import {
-    Aggregate,
-    Document,
-    DocumentToObjectOptions,
-    Model as MongooseModel,
-    ModelMapReduceOption,
-    ModelUpdateOptions,
-    NativeError,
-    Query,
-    SaveOptions,
-    Schema,
-    ValidationError,
+	Aggregate,
+	Document,
+	DocumentToObjectOptions,
+	Model as MongooseModel,
+	ModelMapReduceOption,
+	ModelUpdateOptions,
+	NativeError,
+	Query,
+	SaveOptions,
+	Schema,
+	ValidationError,
 } from 'mongoose';
 
 export interface IModelType<T extends TypedModel> {
-    new(model?: Document): T;
+	new(model?: Document): T;
 }
 
 export interface IMeta {
-    properties: any;
-    schemaOptions: any;
+	properties: any;
+	schemaOptions: any;
 }
 
 export type Ref<T> = T | string;
 
 export class TypedModel {
-    private static _model: MongooseModel<Document>;
-    private static _meta: IMeta;
-    private static _schema: Schema;
-    private _document: Document;
+	protected static _model: MongooseModel<Document>;
+	protected static _meta: IMeta;
+	protected static _schema: Schema;
 
-    constructor(document?: any) {
-        if (document && typeof document.__v !== 'undefined') {
-            this._document = document;
-            return;
-        }
+	protected _document: Document;
 
-        const DocumentModel = (this.constructor as any)._model;
-        this._document = new DocumentModel(document);
-    }
+	constructor(document?: any) {
+		if (document && typeof document.__v !== 'undefined') {
+			this._document = document;
+			return;
+		}
 
-	/************************************************
-	 *
-	 * Getters and setters
-	 *
-	 ************************************************/
+		const Model = (this.constructor as any)._model;
+		this._document = new Model(document);
+	}
 
-    public get document(): Document {
-        return this._document;
-    }
+	public get document(): Document {
+		return this._document;
+	}
 
-    public get _id(): any {
-        return this._document._id;
-    }
+	public get _id(): any {
+		return this._document._id;
+	}
 
-    public set _id(value: any) {
-        this._document._id = value;
-    }
+	public set _id(value: any) {
+		this._document._id = value;
+	}
 
-    public get __v(): any {
-        return this._document.__v;
-    }
+	public get __v(): any {
+		return this._document.__v;
+	}
 
-    public set __v(value: any) {
-        this._document.__v = value;
-    }
+	public set __v(value: any) {
+		this._document.__v = value;
+	}
 
-    public get id(): any {
-        return (this._document as any).id;
-    }
+	public get id(): any {
+		return (this._document as any).id;
+	}
 
-    public get isNew(): boolean {
-        return this._document.isNew;
-    }
+	public get isNew(): boolean {
+		return this._document.isNew;
+	}
 
 	/************************************************
 	 *
-	 *  Static methods
+	 * Static methods
 	 *
 	 ************************************************/
 
 	/**
-	 * Returns mongoose model class
+	 * Returns Model class
 	 */
-    public static get model(): MongooseModel<Document> {
-        return this._model;
-    }
+	public static get Model(): MongooseModel<Document> {
+		return this._model;
+	}
 
 	/**
 	 * Returns schema instance
 	 */
-    public static get schema(): Schema {
-        return this._schema;
-    }
+	public static get schema(): Schema {
+		return this._schema;
+	}
 
 	/**
 	 * Removes documents from the collection.
 	 */
-    public static async remove(conditions?: object): Promise<void> {
-        return this._model.remove(conditions);
-    }
+	public static remove(conditions?: object): Query<void> {
+		return this._model.remove(conditions) as any;
+	}
 
 	/**
 	 * Finds documents.
 	 */
-    public static async find<T extends TypedModel[]>(
-        conditions?: object,
-        projection?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.find(conditions, projection, options));
-    }
+	public static find<T extends TypedModel[]>(
+		conditions?: object,
+		projection?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.find(conditions, projection, options));
+	}
 
 	/**
 	 * Finds a single document by its _id field. findById(id) is almost*
 	 * equivalent to findOne({ _id: id }). findById() triggers findOne hooks.
 	 */
-    public static async findById<T extends TypedModel>(
-        id: object | string | number,
-        projection?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findById(id, projection, options));
-    }
+	public static findById<T extends TypedModel>(
+		id: object | string | number,
+		projection?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findById(id, projection, options));
+	}
 
 	/**
 	 * Finds one document. The conditions are cast to their respective
 	 * SchemaTypes before the command is sent.
 	 */
-    public static async findOne<T extends TypedModel>(
-        conditions: object,
-        projection?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findOne(conditions, projection, options));
-    }
+	public static findOne<T extends TypedModel>(
+		conditions: object,
+		projection?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findOne(conditions, projection, options));
+	}
 
 	/**
 	 * Counts number of matching documents in a database collection.
 	 */
-    public static async count(conditions?: object): Promise<number> {
-        return this._model.count(conditions);
-    }
+	public static count(conditions?: object): Query<number> {
+		return this._model.count(conditions) as any;
+	}
 
 	/**
 	 * Creates a Query for a distinct operation.
 	 */
-    public static async distinct(field: string, conditions?: object): Promise<any[]> {
-        return this._model.distinct(field, conditions);
-    }
+	public static distinct(field: string, conditions?: object): Query<any[]> {
+		return this._model.distinct(field, conditions) as any;
+	}
 
 	/**
 	 * Creates a Query, applies the passed conditions, and returns the Query.
 	 */
-    public static async where<T extends TypedModel[]>(
-        path: string,
-        conditions?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.where(path, conditions));
-    }
+	public static where<T extends TypedModel[]>(
+		path: string,
+		conditions?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.where(path, conditions) as any);
+	}
 
 	/**
 	 * Creates a Query and specifies a $where condition.
 	 */
-    public static async $where<T extends TypedModel[]>(
-        argument: string | Function,
-    ): Promise<T> {
-        return this.fromQuery(this._model.$where(argument));
-    }
+	public static $where<T extends TypedModel[]>(
+		argument: string | Function,
+	): Query<T> {
+		return this.fromQuery(this._model.$where(argument));
+	}
 
 	/**
 	 * Issues a mongodb findAndModify update command.
 	 * Finds a matching document, updates it according to the update arg, passing
 	 * any options, and returns the found document.
 	 */
-    public static async findOneAndUpdate<T extends TypedModel>(
-        conditions?: object,
-        update?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findOneAndUpdate(conditions, update, options));
-    }
+	public static findOneAndUpdate<T extends TypedModel>(
+		conditions?: object,
+		update?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findOneAndUpdate(conditions, update, options));
+	}
 
 	/**
 	 * Issues a mongodb findAndModify update command by a document's _id field.
 	 * findByIdAndUpdate(id, ...) is equivalent to
 	 * findOneAndUpdate({ _id: id }, ...).
 	 */
-    public static async findByIdAndUpdate<T extends TypedModel>(
-        id: object | number | string,
-        update?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findByIdAndUpdate(id, update, options));
-    }
+	public static findByIdAndUpdate<T extends TypedModel>(
+		id: object | number | string,
+		update?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findByIdAndUpdate(id, update, options));
+	}
 
 	/**
 	 * Issue a mongodb findAndModify remove command.
 	 * Finds a matching document, removes it.
 	 */
-    public static async findOneAndRemove<T extends TypedModel>(
-        conditions?: object,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findOneAndRemove(conditions, options));
-    }
+	public static findOneAndRemove<T extends TypedModel>(
+		conditions?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findOneAndRemove(conditions, options));
+	}
 
 	/**
 	 * Issue a mongodb findAndModify remove command by a document's _id field.
 	 * findByIdAndRemove(id, ...) is equivalent to
 	 * findOneAndRemove({ _id: id }, ...). Finds a matching document, removes it.
 	 */
-    public static async findByIdAndRemove<T extends TypedModel>(
-        id: object | number | string,
-        options?: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.findByIdAndRemove(id, options));
-    }
+	public static findByIdAndRemove<T extends TypedModel>(
+		id: object | number | string,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findByIdAndRemove(id, options));
+	}
 
 	/**
 	 * Shortcut for saving one or more documents to the database.
 	 * MyModel.create(docs) does new MyModel(doc).save() for every doc in docs.
 	 * Triggers the save() hook.
 	 */
-    public static async create<T extends TypedModel>(doc: any[]): Promise<T[]>;
-    public static async create<T extends TypedModel>(doc: any): Promise<T> {
-        return this.parseResult(await this._model.create(doc)) as any;
-    }
+	public static async create<T extends TypedModel>(doc: any[]): Promise<T[]>;
+	public static async create<T extends TypedModel>(doc: any): Promise<T> {
+		return this.parseResult(await this._model.create(doc)) as any;
+	}
 
 	/**
 	 * Shortcut for validating an array of documents and inserting them into
@@ -234,32 +229,32 @@ export class TypedModel {
 	 * document.
 	 * This function does not trigger save middleware.
 	 */
-    public static async insertMany<T extends TypedModel>(docs: any): Promise<T>;
-    public static async insertMany<T extends TypedModel>(docs: any[]): Promise<T[]> {
-        return this.parseResult(await this._model.insertMany(docs)) as any;
-    }
+	public static async insertMany<T extends TypedModel>(docs: any): Promise<T>;
+	public static async insertMany<T extends TypedModel>(docs: any[]): Promise<T[]> {
+		return this.parseResult(await this._model.insertMany(docs)) as any;
+	}
 
 	/**
 	 * Shortcut for creating a new Document from existing raw data,
 	 * pre-saved in the DB. The document returned has no paths marked
 	 * as modified initially.
 	 */
-    public static hydrate<T extends TypedModel>(obj: object): T {
-        return this.parseResult(this._model.hydrate(obj)) as T;
-    }
+	public static hydrate<T extends TypedModel>(obj: object): T {
+		return this.parseResult(this._model.hydrate(obj)) as T;
+	}
 
 	/**
 	 * Updates documents in the database without returning them.
 	 * All update values are cast to their appropriate SchemaTypes before being
 	 * sent.
 	 */
-    public static async update(
-        conditions: object,
-        doc: object,
-        options?: ModelUpdateOptions,
-    ): Promise<any> {
-        return this._model.update(conditions, doc, options);
-    }
+	public static update(
+		conditions: object,
+		doc: object,
+		options?: ModelUpdateOptions,
+	): Query<any> {
+		return this._model.update(conditions, doc, options) as any;
+	}
 
 	/**
 	 * Same as `update()`, except MongoDB will update _all_ documents that match
@@ -268,13 +263,13 @@ export class TypedModel {
 	 * **Note** updateMany will _not_ fire update middleware. Use
 	 * `pre('updateMany')` and `post('updateMany')` instead.
 	 */
-    public static async updateMany(
-        conditions: object,
-        doc: object,
-        options?: ModelUpdateOptions,
-    ): Promise<any> {
-        return (this._model as any).updateMany(conditions, doc, options);
-    }
+	public static updateMany(
+		conditions: object,
+		doc: object,
+		options?: ModelUpdateOptions,
+	): Query<any> {
+		return (this._model as any).updateMany(conditions, doc, options);
+	}
 
 	/**
 	 * Same as `update()`, except MongoDB will update _only_ the first document
@@ -283,13 +278,13 @@ export class TypedModel {
 	 * **Note** updateMany will _not_ fire update middleware. Use
 	 * `pre('updateMany')` and `post('updateMany')` instead.
 	 */
-    public static async updateOne(
-        conditions: object,
-        doc: object,
-        options?: ModelUpdateOptions,
-    ): Promise<any> {
-        return (this._model as any).updateOne(conditions, doc, options);
-    }
+	public static updateOne(
+		conditions: object,
+		doc: object,
+		options?: ModelUpdateOptions,
+	): Query<any> {
+		return (this._model as any).updateOne(conditions, doc, options);
+	}
 
 	/**
 	 * Same as `update()`, except MongoDB replace the existing document with the
@@ -298,99 +293,90 @@ export class TypedModel {
 	 * **Note** updateMany will _not_ fire update middleware. Use
 	 * `pre('updateMany')` and `post('updateMany')` instead.
 	 */
-    public static async replaceOne(
-        conditions: object,
-        doc: object,
-        options?: ModelUpdateOptions,
-    ): Promise<any> {
-        return (this._model as any).replaceOne(conditions, doc, options);
-    }
+	public static replaceOne(
+		conditions: object,
+		doc: object,
+		options?: ModelUpdateOptions,
+	): Query<any> {
+		return (this._model as any).replaceOne(conditions, doc, options);
+	}
 
 	/**
 	 * Executes a mapReduce command.
 	 */
-    public static async mapReduce<Key, Value>(
-        o: ModelMapReduceOption<Document, Key, Value>,
-    ): Promise<any> {
-        return this._model.mapReduce(o);
-    }
+	public static mapReduce<Key, Value>(
+		o: ModelMapReduceOption<Document, Key, Value>,
+	): Promise<any> {
+		return this._model.mapReduce(o);
+	}
 
 	/**
 	 * geoNear support for Mongoose
 	 */
-    public static async geoNear<T extends TypedModel[]>(
-        near: any | any[],
-        options: object,
-    ): Promise<T> {
-        return this.fromQuery(this._model.geoNear(near, options));
-    }
+	public static geoNear<T extends TypedModel[]>(
+		near: any | any[],
+		options: object,
+	): Query<T> {
+		return this.fromQuery(this._model.geoNear(near, options));
+	}
 
 	/**
 	 * Performs aggregations on the models collection.
 	 */
-    public static aggregate(...aggregations: object[]): Aggregate<object[]> {
-        return this._model.aggregate(...aggregations);
-    }
+	public static aggregate(...aggregations: object[]): Aggregate<object[]> {
+		return this._model.aggregate(...aggregations);
+	}
 
 	/**
 	 * Implements $geoSearch functionality for Mongoose
 	 */
-    public static async geoSearch<T extends TypedModel[]>(
-        conditions: object,
-        options: {
-            /** x,y point to search for */
-            near: number[];
-            /** the maximum distance from the point near that a result can be */
-            maxDistance: number;
-            /** The maximum number of results to return */
-            limit?: number;
-            /** return the raw object instead of the Mongoose TypedModel */
-            lean?: boolean;
-        }): Promise<T> {
-        return this.fromQuery(this._model.geoSearch(conditions, options));
-    }
+	public static geoSearch<T extends TypedModel[]>(
+		conditions: object,
+		options: {
+			/** x,y point to search for */
+			near: number[];
+			/** the maximum distance from the point near that a result can be */
+			maxDistance: number;
+			/** The maximum number of results to return */
+			limit?: number;
+			/** return the raw object instead of the Mongoose Model */
+			lean?: boolean;
+		}): Query<T> {
+		return this.fromQuery(this._model.geoSearch(conditions, options));
+	}
 
-    // tslint:disable-next-line no-empty
-    private static initSchema(): void { }
+	// tslint:disable-next-line no-empty
+	protected static initSchema(): void { }
 
-	/**
-	 * Convert mongo query to Promise.
-	 * @param query Mongo query
-	 */
-    private static fromQuery<T extends TypedModel[]>(query: Promise<any>): Promise<any>;
-    private static fromQuery<T extends TypedModel>(query: Promise<any>): Promise<any> {
-        const exec = query.exec;
-        const then = query.then;
+	protected static fromQuery<T extends TypedModel[]>(query: Query<any>): Query<any>;
+	protected static fromQuery<T extends TypedModel>(query: Query<any>): Query<any> {
+		const exec = query.exec;
+		const then = query.then;
 
-        (query as any).exec = async (...args: any[]) => {
-            return this.parseResult(await exec.apply(query, args));
-        };
-        (query as any).then = async (...args: any[]) => {
-            return this.parseResult(await then.apply(query, args));
-        };
+		(query as any).exec = async (...args: any[]) => {
+			return this.parseResult(await exec.apply(query, args));
+		};
+		(query as any).then = async (...args: any[]) => {
+			return this.parseResult(await then.apply(query, args));
+		};
 
-        return query as any;
-    }
+		return query as any;
+	}
 
-	/**
-	 * Convert object to array if necessary.
-	 * @param this
-	 * @param result
-	 */
-    private static parseResult<T extends TypedModel>(
-        this: IModelType<T>,
-        result: any,
-    ): T | T[] {
-        if (!result) {
-            return null;
-        }
+	protected static parseResult<T extends TypedModel>(
+		this: IModelType<T>,
+		result: any,
+	): T | T[] {
+		if (!result) {
+			return null;
+		}
 
-        if (Array.isArray(result)) {
-            return result.map(r => new this(r));
-        } else {
-            return new this(result);
-        }
-    }
+		if (Array.isArray(result)) {
+			return result.map(r => new this(r));
+		} else {
+			return new this(result);
+		}
+	}
 
 	/************************************************
 	 *
@@ -398,19 +384,19 @@ export class TypedModel {
 	 *
 	 ************************************************/
 
-    /** Checks if a path is set to its default. */
-    public $isDefault(path?: string): boolean {
-        return this._document.$isDefault(path);
-    }
+	/** Checks if a path is set to its default. */
+	public $isDefault(path?: string): boolean {
+		return this._document.$isDefault(path);
+	}
 
 	/**
 	 * Takes a populated field and returns it to its unpopulated state.
 	 * If the path was not populated, this is a no-op.
 	 */
-    public depopulate(path: string): this {
-        this._document.depopulate(path);
-        return this;
-    }
+	public depopulate(path: string): this {
+		this._document.depopulate(path);
+		return this;
+	}
 
 	/**
 	 * Returns true if the Document stores the same data as doc.
@@ -418,37 +404,37 @@ export class TypedModel {
 	 * neither document has an _id, in which case this function falls back to
 	 * using deepEqual().
 	 */
-    public equals(doc: this): boolean {
-        return this._document.equals(doc.document);
-    }
+	public equals(doc: this): boolean {
+		return this._document.equals(doc.document);
+	}
 
 	/**
 	 * Explicitly executes population and returns a promise.
 	 * Useful for ES2015 integration.
 	 */
-    public async execPopulate(): Promise<this> {
-        return this.fromQuery(await this._document.execPopulate());
-    }
+	public async execPopulate(): Promise<this> {
+		return this.fromQuery(await this._document.execPopulate());
+	}
 
 	/**
 	 * Returns the value of a path.
 	 */
-    public get(path: string, type?: any): any {
-        return this._document.get(path, type);
-    }
+	public get(path: string, type?: any): any {
+		return this._document.get(path, type);
+	}
 
 	/**
 	 * Initializes the document without setters or marking anything modified.
 	 * Called internally after a document is returned from mongodb.
 	 */
-    public init(doc: Document, opts?: object): this {
-        return this.fromQuery(this._document.init(doc, opts));
-    }
+	public init(doc: Document, opts?: object): this {
+		return this.fromQuery(this._document.init(doc, opts));
+	}
 
-    /** Helper for console.log */
-    public inspect(options?: object): any {
-        return this._document.inspect(options);
-    }
+	/** Helper for console.log */
+	public inspect(options?: object): any {
+		return this._document.inspect(options);
+	}
 
 	/**
 	 * Marks a path as invalid, causing validation to fail.
@@ -456,61 +442,61 @@ export class TypedModel {
 	 * The value argument (if passed) will be available through the
 	 * ValidationError.value property.
 	 */
-    public invalidate(
-        path: string,
-        errorMsg: string | NativeError,
-        value: any,
-        kind?: string,
-    ): ValidationError | boolean {
-        return this._document.invalidate(path, errorMsg, value, kind);
-    }
+	public invalidate(
+		path: string,
+		errorMsg: string | NativeError,
+		value: any,
+		kind?: string,
+	): ValidationError | boolean {
+		return this._document.invalidate(path, errorMsg, value, kind);
+	}
 
 	/**
 	 * Returns true if path was directly set and modified, else false.
 	 */
-    public isDirectModified(path: string): boolean {
-        return this._document.isDirectModified(path);
-    }
+	public isDirectModified(path: string): boolean {
+		return this._document.isDirectModified(path);
+	}
 
 	/**
 	 * Checks if path was initialized
 	 */
-    public isInit(path: string): boolean {
-        return this._document.isInit(path);
-    }
+	public isInit(path: string): boolean {
+		return this._document.isInit(path);
+	}
 
 	/**
 	 * Returns true if this document was modified, else false.
 	 * If path is given, checks if a path or any full path containing path as
 	 * part of its path chain has been modified.
 	 */
-    public isModified(path?: string): boolean {
-        return this._document.isModified(path);
-    }
+	public isModified(path?: string): boolean {
+		return this._document.isModified(path);
+	}
 
 	/**
 	 * Checks if path was selected in the source query which initialized this
 	 * document.
 	 */
-    public isSelected(path: string): boolean {
-        return this._document.isSelected(path);
-    }
+	public isSelected(path: string): boolean {
+		return this._document.isSelected(path);
+	}
 
 	/**
 	 * Marks the path as having pending changes to write to the db.
 	 * Very helpful when using Mixed types.
 	 * @param path the path to mark modified
 	 */
-    public markModified(path: string): void {
-        this._document.markModified(path);
-    }
+	public markModified(path: string): void {
+		this._document.markModified(path);
+	}
 
 	/**
 	 * Returns the list of paths that have been modified.
 	 */
-    public modifiedPaths(): string[] {
-        return this._document.modifiedPaths();
-    }
+	public modifiedPaths(): string[] {
+		return this._document.modifiedPaths();
+	}
 
 	/**
 	 * Populates document references, executing the callback when complete.
@@ -518,20 +504,20 @@ export class TypedModel {
 	 * execPopulate()
 	 * Population does not occur unless a callback is passed or you explicitly
 	 * call execPopulate(). Passing the same path a second time will overwrite
-	 * the previous path options. See TypedModel.populate() for explaination of
+	 * the previous path options. See Model.populate() for explaination of
 	 * options.
 	 */
-    public populate(...args: any[]): this {
-        return this.fromQuery((this._document as any).populate(...args));
-    }
+	public populate(...args: any[]): this {
+		return this.fromQuery((this._document as any).populate(...args));
+	}
 
 	/**
 	 * Gets _id(s) used during population of the given path. If the path was not
 	 * populated, undefined is returned.
 	 */
-    public populated(path: string): any {
-        return this._document.populated(path);
-    }
+	public populated(path: string): any {
+		return this._document.populated(path);
+	}
 
 	/**
 	 * The return value of this method is used in calls to JSON.stringify(doc).
@@ -539,91 +525,91 @@ export class TypedModel {
 	 * options to every document of your schema by default, set your schemas
 	 * toJSON option to the same argument.
 	 */
-    public toJSON(options?: DocumentToObjectOptions): object {
-        return this._document.toJSON(options);
-    }
+	public toJSON(options?: DocumentToObjectOptions): object {
+		return this._document.toJSON(options);
+	}
 
 	/**
 	 * Converts this document into a plain javascript object, ready for storage
 	 * in MongoDB. Buffers are converted to instances of mongodb.Binary for
 	 * proper storage.
 	 */
-    public toObject(options?: DocumentToObjectOptions): object {
-        return this._document.toObject(options);
-    }
+	public toObject(options?: DocumentToObjectOptions): object {
+		return this._document.toObject(options);
+	}
 
 	/**
 	 * Helper for console.log
 	 */
-    public toString(): string {
-        return this._document.toString();
-    }
+	public toString(): string {
+		return this._document.toString();
+	}
 
 	/**
 	 * Clears the modified state on the specified path.
 	 * @param path the path to unmark modified
 	 */
-    public unmarkModified(path: string): void {
-        this._document.unmarkModified(path);
-    }
+	public unmarkModified(path: string): void {
+		this._document.unmarkModified(path);
+	}
 
 	/**
 	 * Executes registered validation rules for this document.
 	 */
-    public validate(optional?: object): Promise<void> {
-        return this._document.validate(optional);
-    }
+	public validate(optional?: object): Promise<void> {
+		return this._document.validate(optional);
+	}
 
 	/**
 	 * Executes registered validation rules (skipping asynchronous validators for
 	 * this document. This method is useful if you need synchronous validation.
 	 */
-    public validateSync(pathsToValidate: string | string[]): Error {
-        return this._document.validateSync(pathsToValidate);
-    }
+	public validateSync(pathsToValidate: string | string[]): Error {
+		return this._document.validateSync(pathsToValidate);
+	}
 
 	/**
 	 * Saves this document.
 	 */
-    public async save(options?: SaveOptions): Promise<this> {
-        return this.fromQuery(await this._document.save(options));
-    }
+	public async save(options?: SaveOptions): Promise<this> {
+		return this.fromQuery(await this._document.save(options));
+	}
 
 	/**
 	 * Signal that we desire an increment of this documents version.
 	 */
-    public increment(): this {
-        this._document.increment();
-        return this;
-    }
+	public increment(): this {
+		this._document.increment();
+		return this;
+	}
 
 	/**
 	 * Removes this document from the db.
 	 */
-    public remove(): Promise<this> {
-        return this._document.remove().then(() => this);
-    }
+	public remove(): Promise<this> {
+		return this._document.remove().then(() => this);
+	}
 
 	/**
 	 * Sends an update command with this document _id as the query selector.
 	 */
-    public async update(doc: object, options?: ModelUpdateOptions): Promise<this> {
-        return this.fromQuery(await this._document.update(doc, options));
-    }
+	public async update(doc: object, options?: ModelUpdateOptions): Query<this> {
+		return this.fromQuery(await this._document.update(doc, options));
+	}
 
 	/**
 	 * Sets the value of a path, or many paths.
 	 */
-    public set(...values: any[]): this {
-        (this._document as any).set(...values);
-        return this;
-    }
+	public set(...values: any[]): this {
+		(this._document as any).set(...values);
+		return this;
+	}
 
 	/**
 	 * Makes a model instance from document
 	 */
-    private fromQuery(document: Document): this {
-        const DocumentModel = this.constructor as any;
-        return new DocumentModel(document);
-    }
+	protected fromQuery(document: Document): this {
+		const Model = this.constructor as any;
+		return new Model(document);
+	}
 }

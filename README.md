@@ -1,37 +1,68 @@
-# mongoose-model
-[![Build Status](https://travis-ci.org/megahertz/mongoose-model.svg?branch=master)](https://travis-ci.org/megahertz/mongoose-model)
-[![NPM version](https://badge.fury.io/js/mongoose-model.svg)](https://badge.fury.io/js/mongoose-model)
-[![Dependencies status](https://david-dm.org/megahertz/mongoose-model/status.svg)](https://david-dm.org/megahertz/mongoose-model)
-
-## This package is experimental and not ready for production
-
 ## Installation
 
-Install with [npm](https://npmjs.org/package/mongoose-model):
+Install with [npm](https://npmjs.org/package/lemon-js):
 
-    npm install mongoose-model
+    npm i -S lemon-js
 
 ## Usage
 
 ```typescript
-import { Model, model, property } from "..";
+import { Model, model, property } from 'lemon-js';
 
 @model
-export default class User extends Model {
-  @property public age: number;
-  @property public createdAt: Date;
-  @property public email: string;
+export default class Post extends TypedModel {
+	@property public title: string;
+	@property public body: string;
 
-  @property({ default: false })
-  public isActive: boolean;
+	@property public creator: User;
 
-  @property public name: string;
-
-  public static findByEmail(email: string): Promise<User> {
-    return this.findOne<User>({ email });
-  }
+	public static findByTitle(title: string): Query<Post> {
+		return this.findOne({ title });
+	}
 }
+
+@model
+export default class User extends TypedModel {
+	@property public age: number;
+	@property public createdAt: Date;
+	@property public email: string;
+
+	@property({ default: false })
+	public isActive: boolean;
+
+	@property public name: string;
+
+	public get displayName() {
+		return `${this.name} <${this.email}>`;
+	}
+
+	public static findByEmail(email: string): Promise<User> {
+		return this.findOne({ email });
+	}
+}
+
+const user = new User({
+	age: 20,
+	email: 'user1@example.com',
+	name: 'User 1',
+});
+await user.save();
+
+const post = new Post({
+	body: 'Post body',
+	creator: user._id,
+	title: 'Post 1',
+});
+await post.save();
+
+const post = await Post.findByTitle('Post 1').populate('creator').exec();
+expect(post.title).to.be.equal('Post 1');
+expect(post.creator.displayName).to.be.equal('User 1 <user1@example.com>');
 ```
 ## License
 
 Licensed under MIT.
+
+## Credits
+
+Based on the work of @megahertz/mongoose-model

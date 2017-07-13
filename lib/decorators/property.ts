@@ -1,3 +1,4 @@
+import { Schema } from 'mongoose';
 import 'reflect-metadata';
 import { TypedModel } from '../model';
 
@@ -10,13 +11,13 @@ export function property(
 	propertyKey?: string,
 ) {
 	if (targetOrMeta instanceof TypedModel) {
-		savePropertyMeta(targetOrMeta, propertyKey);
+		savePropertyMeta.bind(this)(targetOrMeta, propertyKey);
 		return;
 	}
 
 	const meta = targetOrMeta;
 	return (target: TypedModel, propKey: string) => {
-		savePropertyMeta(target, propKey, meta);
+		savePropertyMeta.bind(this)(target, propKey, meta);
 	};
 }
 
@@ -34,16 +35,26 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 	if (!meta.type) {
 		const type = Reflect.getMetadata('design:type', target, propertyKey);
 
-		if (type) {
-			meta.type = type;
+		// For some reason, TypedModel is not in the scope.
+		// Effectively, this is equivalent to:
+		// if (type instanceof TypedModel) {
+		if (type._meta) {
+			propsMeta[propertyKey] = {
+				type: Schema.Types.ObjectId,
+				ref: type
+			};
 		} else {
-			const name = constructor.name;
-			throw new Error(
-				`Type of ${name}.${propertyKey} isn't set. Uf you use typescript ` +
-				'you need to enable emitDecoratorMetadata in tsconfig.json',
-			);
+			if (type) {
+				meta.type = type;
+			} else {
+				const name = constructor.name;
+				throw new Error(
+					`Type of ${name}.${propertyKey} isn't set. Uf you use typescript ` +
+					'you need to enable emitDecoratorMetadata in tsconfig.json',
+				);
+			}
+
+			propsMeta[propertyKey] = meta;
 		}
 	}
-
-	propsMeta[propertyKey] = meta;
 }

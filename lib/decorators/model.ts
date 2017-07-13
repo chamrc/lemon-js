@@ -1,4 +1,5 @@
 import { model as mongooseModel, Schema } from 'mongoose';
+import * as pluralize from 'pluralize';
 import { TypedModel } from '../model';
 
 export function model(constructor: typeof TypedModel);
@@ -31,7 +32,7 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
 	cls.initSchema();
-	cls._Model = mongooseModel(name, cls._schema);
+	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
 
 function initProp(name: string, options: any, constructor: typeof TypedModel) {

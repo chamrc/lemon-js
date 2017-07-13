@@ -70,7 +70,7 @@
 			"trace"
 		],
 		"no-construct": true,
-		"no-debugger": true,
+		"no-debugger": false,
 		"no-duplicate-variable": true,
 		"no-empty": false,
 		"no-eval": true,
@@ -78,7 +78,7 @@
 		"no-shadowed-variable": true,
 		"no-string-literal": false,
 		"no-switch-case-fall-through": true,
-		"no-unused-expression": true,
+		"no-unused-expression": false,
 		"no-unused-variable": false,
 		"no-var-keyword": true,
 		"switch-default": true,

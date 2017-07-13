@@ -1,6 +1,6 @@
 {
 	"name": "lemon-js",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Define your mongoose models easily with Typescript",
 	"main": "./dist/index.js",
 	"scripts": {
@@ -8,6 +8,8 @@
 		"build": "tsc",
 		"mocha": "mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"test": "npm run tslint && npm run mocha",
+		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk",
+		"watch": "tsc -w",
 		"tslint": "tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts"
 	},
 	"typings": "./dist/index.d.ts",
@@ -37,16 +39,18 @@
 	"devDependencies": {
 		"@types/chai": "^3.5.2",
 		"@types/mocha": "^2.2.41",
-		"@types/mongoose": "^4.7.18",
 		"@types/node": "^7.0.33",
 		"chai": "^3.5.0",
+		"codelyzer": "^3.1.2",
 		"mocha": "^3.4.2",
 		"mongoose": "^4.11.1",
+		"reflect-metadata": "*",
 		"ts-node": "^3.2.0",
 		"tslint": "^5.5.0",
-		"typescript": "^2.4.1",
-		"codelyzer": "^3.1.2",
-		"reflect-metadata": "*"
+		"typescript": "^2.4.1"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"pluralize": "^5.0.0",
+		"q": "^1.5.0"
+	}
 }
