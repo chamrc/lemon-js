@@ -4,7 +4,6 @@
 	"description": "Define your mongoose models easily with Typescript",
 	"main": "./dist/index.js",
 	"scripts": {
-		// "prepublish": "npm run build && npm run test",
 		"build": "tsc",
 		"mocha": "mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"test": "npm run tslint && npm run mocha",
