@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import User from './models/User';
+import { User } from './models';
 
 const email = 'user1@example.com';
 

@@ -4,12 +4,12 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"lib": [
-			"es6"
+			"es5"
 		],
 		"module": "commonjs",
 		"outDir": "./dist",
 		"sourceMap": true,
-		"target": "es6"
+		"target": "es5"
 	},
 	"include": [
 		"./index.ts",

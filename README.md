@@ -6,45 +6,63 @@ Install with [npm](https://npmjs.org/package/lemon-js):
 
 ## Usage
 
+### Define models
+
 ```typescript
 import { Model, model, property } from 'lemon-js';
 
 @model
-export default class User extends TypedModel {
+export class Permission extends TypedModel {
+	@property public name: string;
+}
+
+@model
+export class User extends TypedModel {
 	@property public age: number;
 	@property public createdAt: Date;
 	@property public email: string;
-
-	@property({ default: false })
-	public isActive: boolean;
-
 	@property public name: string;
+	@property({ default: false }) public isActive: boolean;
+	@property({ reference: Permission, asArray: true }) public permissions: [Permission];
 
 	public get displayName() {
 		return `${this.name} <${this.email}>`;
 	}
 
-	public static findByEmail(email: string): Promise<User> {
+	public static findByEmail(email: string): Query<User> {
 		return this.findOne({ email });
 	}
 }
 
 @model
-export default class Post extends TypedModel {
+export class Post extends TypedModel {
 	@property public title: string;
 	@property public body: string;
-
-	@property public creator: User;
+	@property({ reference: User }) public creator: User;
 
 	public static findByTitle(title: string): Query<Post> {
 		return this.findOne({ title });
 	}
 }
+```
+
+### Insert objects
+```typescript
+const write = new Permission({
+	name: 'write'
+});
+await write.save();
+
+const read = new Permission({
+	name: 'read'
+});
+await read.save();
 
 const user = new User({
 	age: 20,
 	email: 'user1@example.com',
 	name: 'User 1',
+	permissions: [read._id, write._id]
 });
 await user.save();
 
@@ -54,11 +72,21 @@ const post = new Post({
 	title: 'Post 1',
 });
 await post.save();
+```
 
+### Retrieve objects
+```typescript
 const post = await Post.findByTitle('Post 1').populate('creator').exec();
 expect(post.title).to.be.equal('Post 1');
 expect(post.creator.displayName).to.be.equal('User 1 <user1@example.com>');
+
+const user = await User.findByEmail('user1@example.com').populate('permissions').exec();
+expect(user.name).to.be.equal('User 1');
+expect(user.permissions.length).to.be.equal(2);
+expect(user.permissions[0].name).to.be.equal('read');
+expect(user.permissions[1].name).to.be.equal('write');
 ```
+
 ## License
 
 Licensed under MIT.

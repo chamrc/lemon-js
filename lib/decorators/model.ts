@@ -1,5 +1,6 @@
 import { model as mongooseModel, Schema } from 'mongoose';
 import * as pluralize from 'pluralize';
+import { PropertyMetaType } from '.';
 import { TypedModel } from '../model';
 
 export function model(constructor: typeof TypedModel);
@@ -19,7 +20,7 @@ export function model(constructorOrOptions: typeof TypedModel | object) {
 function initializeModel(constructor: typeof TypedModel, options?: any) {
 	const cls = constructor as any;
 	const name: string = cls.name;
-	let properties = cls._meta.properties;
+	let properties = cls._meta.properties as PropertyMetaType;
 
 	if (options) {
 		cls._meta.schemaOptions = options;
@@ -35,17 +36,7 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
 
-function initProp(name: string, options: any, constructor: typeof TypedModel) {
-	const result = { ...options };
-
-	if (options.ref) {
-		result.ref = options.ref.name;
-
-		if (!options.type) {
-			result.type = Schema.Types.ObjectId;
-		}
-	}
-
+function initProp(name: string, options: PropertyMetaType, constructor: typeof TypedModel) {
 	Object.defineProperty(constructor.prototype, name, {
 		configurable: true,
 		enumerable: true,
@@ -53,8 +44,12 @@ function initProp(name: string, options: any, constructor: typeof TypedModel) {
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
 
-			if (options.ref && value) {
-				return new options.ref(value);
+			if (options.reference && value) {
+				if (options.asArray && Array.isArray(value)) {
+					return value.map(r => new options.reference(r));
+				} else {
+					return new options.reference(value);
+				}
 			}
 
 			return value;
@@ -67,6 +62,19 @@ function initProp(name: string, options: any, constructor: typeof TypedModel) {
 			this._document[name] = value;
 		},
 	});
+
+	const result: PropertyMetaType = { ...options };
+
+	if (options.reference) {
+		result.type = Schema.Types.ObjectId;
+		result.ref = options.reference.name;
+		delete result.reference;
+		delete result.asArray;
+
+		if (options.asArray) {
+			return [result];
+		}
+	}
 
 	return result;
 }
