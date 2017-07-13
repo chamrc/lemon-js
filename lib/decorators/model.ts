@@ -31,6 +31,8 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 		return result;
 	}, {});
 
+	debugger;
+
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
 	cls.initSchema();
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
@@ -44,11 +46,14 @@ function initProp(name: string, options: PropertyMetaType, constructor: typeof T
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
 
-			if (options.reference && value) {
-				if (options.asArray && Array.isArray(value)) {
-					return value.map(r => new options.reference(r));
+			debugger;
+
+			if (value && (options.refer || options.ref)) {
+				let ValueType = options.ref ? options.ref : options.refer;
+				if (Array.isArray(value)) {
+					return value.map(r => new ValueType(r));
 				} else {
-					return new options.reference(value);
+					return new ValueType(value);
 				}
 			}
 
@@ -65,13 +70,12 @@ function initProp(name: string, options: PropertyMetaType, constructor: typeof T
 
 	const result: PropertyMetaType = { ...options };
 
-	if (options.reference) {
+	if (options.refer || options.ref) {
 		result.type = Schema.Types.ObjectId;
-		result.ref = options.reference.name;
-		delete result.reference;
-		delete result.asArray;
+		result.ref = options.ref ? options.ref.name : options.refer.name;
+		delete result.refer;
 
-		if (options.asArray) {
+		if (options.type === Array) {
 			return [result];
 		}
 	}

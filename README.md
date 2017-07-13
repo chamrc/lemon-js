@@ -23,7 +23,7 @@ export class User extends TypedModel {
 	@property public email: string;
 	@property public name: string;
 	@property({ default: false }) public isActive: boolean;
-	@property({ reference: Permission, asArray: true }) public permissions: [Permission];
+	@property({ refer: Permission }) public permissions: [Permission];
 
 	public get displayName() {
 		return `${this.name} <${this.email}>`;
@@ -38,7 +38,7 @@ export class User extends TypedModel {
 export class Post extends TypedModel {
 	@property public title: string;
 	@property public body: string;
-	@property({ reference: User }) public creator: User;
+	@property({ refer: User }) public creator: User;
 
 	public static findByTitle(title: string): Query<Post> {
 		return this.findOne({ title });

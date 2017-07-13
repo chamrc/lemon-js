@@ -4,9 +4,9 @@ import { TypedModel } from '../model';
 
 export interface SchemaOptions {
 	// From lemon-js
-	reference?: Function;
-	asArray?: boolean;
+	refer?: Function;
 	// From Mongoose
+	ref?: Function;
 	required?: boolean;
 	default?: any;
 	select?: boolean;

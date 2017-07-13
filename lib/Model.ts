@@ -499,7 +499,7 @@ export class TypedModel {
 	}
 
 	/**
-	 * Populates document references, executing the callback when complete.
+	 * Populates document refers, executing the callback when complete.
 	 * If you want to use promises instead, use this function with
 	 * execPopulate()
 	 * Population does not occur unless a callback is passed or you explicitly

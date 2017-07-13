@@ -5,7 +5,7 @@ import { User } from './user';
 export class Post extends TypedModel {
 	@property public title: string;
 	@property public body: string;
-	@property({ reference: User }) public creator: User;
+	@property({ ref: User }) public creator: User;
 
 	public static findByTitle(title: string): Query<Post> {
 		return this.findOne({ title });
