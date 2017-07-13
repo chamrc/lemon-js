@@ -1,71 +1,71 @@
-import { model as mongooseModel, Schema } from "mongoose";
-import Model from "../Model";
+import { model as mongooseModel, Schema } from 'mongoose';
+import { TypedModel } from '../model';
 
-export default function model(constructor: typeof Model);
-export default function model(options: object);
-export default function model(constructorOrOptions: typeof Model|object) {
-  if (typeof constructorOrOptions === "function") {
-    initializeModel(constructorOrOptions);
-    return;
-  }
+export function model(constructor: typeof TypedModel);
+export function model(options: object);
+export function model(constructorOrOptions: typeof TypedModel | object) {
+	if (typeof constructorOrOptions === 'function') {
+		initializeModel(constructorOrOptions);
+		return;
+	}
 
-  const options = constructorOrOptions;
-  return (constructor: typeof Model) => {
-    initializeModel(constructor, options);
-  };
+	const options = constructorOrOptions;
+	return (constructor: typeof TypedModel) => {
+		initializeModel(constructor, options);
+	};
 }
 
-function initializeModel(constructor: typeof Model, options?: any) {
-  const cls = constructor as any;
-  const name: string = cls.name;
-  let properties = cls._meta.properties;
+function initializeModel(constructor: typeof TypedModel, options?: any) {
+	const cls = constructor as any;
+	const name: string = cls.name;
+	let properties = cls._meta.properties;
 
-  if (options) {
-    cls._meta.schemaOptions = options;
-  }
+	if (options) {
+		cls._meta.schemaOptions = options;
+	}
 
-  properties = Object.keys(properties).reduce((result, key) => {
-    result[key] = initProp(key, properties[key], constructor);
-    return result;
-  }, {});
+	properties = Object.keys(properties).reduce((result, key) => {
+		result[key] = initProp(key, properties[key], constructor);
+		return result;
+	}, {});
 
-  cls._schema = new Schema(properties, cls._meta.schemaOptions);
-  cls.initSchema();
-  cls._Model = mongooseModel(name, cls._schema);
+	cls._schema = new Schema(properties, cls._meta.schemaOptions);
+	cls.initSchema();
+	cls._Model = mongooseModel(name, cls._schema);
 }
 
-function initProp(name: string, options: any, constructor: typeof Model) {
-  const result = { ...options };
+function initProp(name: string, options: any, constructor: typeof TypedModel) {
+	const result = { ...options };
 
-  if (options.ref) {
-    result.ref = options.ref.name;
+	if (options.ref) {
+		result.ref = options.ref.name;
 
-    if (!options.type) {
-      result.type = Schema.Types.ObjectId;
-    }
-  }
+		if (!options.type) {
+			result.type = Schema.Types.ObjectId;
+		}
+	}
 
-  Object.defineProperty(constructor.prototype, name, {
-    configurable: true,
-    enumerable: true,
-    get() {
-      const doc = this._document;
-      const value = doc ? doc[name] : undefined;
+	Object.defineProperty(constructor.prototype, name, {
+		configurable: true,
+		enumerable: true,
+		get() {
+			const doc = this._document;
+			const value = doc ? doc[name] : undefined;
 
-      if (options.ref && value) {
-        return new options.ref(value);
-      }
+			if (options.ref && value) {
+				return new options.ref(value);
+			}
 
-      return value;
-    },
-    set(value: any) {
-      if (!this._document) {
-        return;
-      }
+			return value;
+		},
+		set(value: any) {
+			if (!this._document) {
+				return;
+			}
 
-      this._document[name] = value;
-    },
-  });
+			this._document[name] = value;
+		},
+	});
 
-  return result;
+	return result;
 }

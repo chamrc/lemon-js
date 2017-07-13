@@ -1,49 +1,49 @@
-import "reflect-metadata";
-import Model from "../Model";
+import 'reflect-metadata';
+import { TypedModel } from '../model';
 
-export default function property(target: Model, propertyKey: string): void;
-export default function property(
-  meta: any,
-): (target: Model, propertyKey: string) => void;
-export default function property(
-  targetOrMeta: Model|any,
-  propertyKey?: string,
+export function property(target: TypedModel, propertyKey: string): void;
+export function property(
+	meta: any,
+): (target: TypedModel, propertyKey: string) => void;
+export function property(
+	targetOrMeta: TypedModel | any,
+	propertyKey?: string,
 ) {
-  if (targetOrMeta instanceof Model) {
-    savePropertyMeta(targetOrMeta, propertyKey);
-    return;
-  }
+	if (targetOrMeta instanceof TypedModel) {
+		savePropertyMeta(targetOrMeta, propertyKey);
+		return;
+	}
 
-  const meta = targetOrMeta;
-  return (target: Model, propKey: string) => {
-    savePropertyMeta(target, propKey, meta);
-  };
+	const meta = targetOrMeta;
+	return (target: TypedModel, propKey: string) => {
+		savePropertyMeta(target, propKey, meta);
+	};
 }
 
-function savePropertyMeta(target: Model, propertyKey: string, meta: any = {}) {
-  const constructor = (target.constructor as any);
-  if (!constructor._meta) {
-    constructor._meta = {
-      properties: {},
-      schemaOptions: {},
-    };
-  }
+function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {}) {
+	const constructor = (target.constructor as any);
+	if (!constructor._meta) {
+		constructor._meta = {
+			properties: {},
+			schemaOptions: {}
+		};
+	}
 
-  const propsMeta: object = constructor._meta.properties;
+	const propsMeta: object = constructor._meta.properties;
 
-  if (!meta.type) {
-    const type = Reflect.getMetadata("design:type", target, propertyKey);
+	if (!meta.type) {
+		const type = Reflect.getMetadata('design:type', target, propertyKey);
 
-    if (type) {
-      meta.type = type;
-    } else {
-      const name = constructor.name;
-      throw new Error(
-        `Type of ${name}.${propertyKey} isn't set. Uf you use typescript ` +
-        "you need to enable emitDecoratorMetadata in tsconfig.json",
-      );
-    }
-  }
+		if (type) {
+			meta.type = type;
+		} else {
+			const name = constructor.name;
+			throw new Error(
+				`Type of ${name}.${propertyKey} isn't set. Uf you use typescript ` +
+				'you need to enable emitDecoratorMetadata in tsconfig.json',
+			);
+		}
+	}
 
-  propsMeta[propertyKey] = meta;
+	propsMeta[propertyKey] = meta;
 }

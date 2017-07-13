@@ -1,52 +1,52 @@
 {
-  "name": "mongoose-model",
-  "version": "0.0.11",
-  "description": "Define your mongoose models easily with Typescript",
-  "main": "./dist/index.js",
-  "scripts": {
-    "prepublish": "npm run build && npm run test",
-    "build": "tsc",
-    "mocha": "mocha -r ts-node/register test/init.ts test/*.spec.ts",
-    "test": "npm run tslint && npm run mocha",
-    "tslint": "tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts"
-  },
-  "typings": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/megahertz/mongoose-model.git"
-  },
-  "files": [
-    "dist"
-  ],
-  "keywords": [
-    "mongoose",
-    "odm",
-    "model",
-    "typescript",
-    "decorator"
-  ],
-  "author": "Alexey Prokhorov",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/megahertz/mongoose-model/issues"
-  },
-  "homepage": "https://github.com/megahertz/mongoose-model#readme",
-  "peerDependencies": {
-    "mongoose": "*"
-  },
-  "devDependencies": {
-    "@types/chai": "^3.5.2",
-    "@types/mocha": "^2.2.41",
-    "@types/mongoose": "^4.7.18",
-    "@types/node": "^7.0.33",
-    "chai": "^3.5.0",
-    "mocha": "^3.4.2",
-    "mongoose": "^4.11.1",
-    "ts-node": "^3.2.0",
-    "tslint": "^5.5.0",
-    "typescript": "^2.4.1"
-  },
-  "dependencies": {
-    "reflect-metadata": "*"
-  }
+	"name": "lemon-js",
+	"version": "0.0.1",
+	"description": "Define your mongoose models easily with Typescript",
+	"main": "./dist/index.js",
+	"scripts": {
+		"prepublish": "npm run build && npm run test",
+		"build": "tsc",
+		"mocha": "mocha -r ts-node/register test/init.ts test/*.spec.ts",
+		"test": "npm run tslint && npm run mocha",
+		"tslint": "tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts"
+	},
+	"typings": "./dist/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/chamrc/lemon-js.git"
+	},
+	"files": [
+		"dist"
+	],
+	"keywords": [
+		"mongoose",
+		"odm",
+		"model",
+		"typescript",
+		"decorator"
+	],
+	"author": "Alexey Prokhorov & Jacob Zhang",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/chamrc/lemon-js/issues"
+	},
+	"homepage": "https://github.com/chamrc/lemon-js#readme",
+	"peerDependencies": {
+		"mongoose": "*"
+	},
+	"devDependencies": {
+		"@types/chai": "^3.5.2",
+		"@types/mocha": "^2.2.41",
+		"@types/mongoose": "^4.7.18",
+		"@types/node": "^7.0.33",
+		"chai": "^3.5.0",
+		"mocha": "^3.4.2",
+		"mongoose": "^4.11.1",
+		"ts-node": "^3.2.0",
+		"tslint": "^5.5.0",
+		"typescript": "^2.4.1",
+		"codelyzer": "^3.1.2",
+		"reflect-metadata": "*"
+	},
+	"dependencies": {}
 }
