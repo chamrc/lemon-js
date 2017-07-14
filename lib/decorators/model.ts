@@ -1,6 +1,6 @@
 import { model as mongooseModel, Schema } from 'mongoose';
 import * as pluralize from 'pluralize';
-import { PropertyMetaType } from '.';
+import { SchemaTypeOptions } from '.';
 import { TypedModel } from '../model';
 
 export function model(constructor: typeof TypedModel);
@@ -20,7 +20,7 @@ export function model(constructorOrOptions: typeof TypedModel | object) {
 function initializeModel(constructor: typeof TypedModel, options?: any) {
 	const cls = constructor as any;
 	const name: string = cls.name;
-	let properties = cls._meta.properties as PropertyMetaType;
+	let properties = cls._meta.properties as SchemaTypeOptions<any>;
 
 	if (options) {
 		cls._meta.schemaOptions = options;
@@ -36,7 +36,7 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
 
-function initProp(name: string, options: PropertyMetaType, constructor: typeof TypedModel) {
+function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: typeof TypedModel) {
 	Object.defineProperty(constructor.prototype, name, {
 		configurable: true,
 		enumerable: true,
@@ -64,14 +64,14 @@ function initProp(name: string, options: PropertyMetaType, constructor: typeof T
 		},
 	});
 
-	const result: PropertyMetaType = { ...options };
+	const result: SchemaTypeOptions<T> = { ...options };
 
 	if (options.refer || options.ref) {
-		result.type = Schema.Types.ObjectId;
-		result.ref = options.ref ? options.ref.name : options.refer.name;
+		result.type = Schema.Types.ObjectId as any;
+		result.ref = <any>(options.ref ? options.ref.name : options.refer.name);
 		delete result.refer;
 
-		if (options.type === Array) {
+		if (options.type as any === Array) {
 			return [result];
 		}
 	}

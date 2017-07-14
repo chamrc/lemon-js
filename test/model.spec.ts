@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { Permission, User } from './models';
+import { ModelMapReduceOption } from '../lib';
+import { Post, User } from './models';
 
 const email1 = 'user1@example.com';
 const email2 = 'user2@abc.com';
@@ -353,24 +354,45 @@ describe('Model:', () => {
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
-		it.skip('public static mapReduce()', async () => {
+		it('public static mapReduce()', async () => {
 			const users = await User.find<User[]>({});
 
-			const write = new Permission({
-				name: 'write'
-			});
-			await write.save();
-			const read = new Permission({
-				name: 'read'
-			});
-			await read.save();
-			await User.update({
-				email: users[0].email
-			}, {
-					permissions: [read._id, write._id]
-				});
+			const post1 = await new Post({
+				title: 'post',
+				body: 'body 1',
+				readCount: 25,
+				creator: users[0]._id
+			}).save();
+			const post2 = await new Post({
+				title: 'post',
+				body: 'body 2',
+				readCount: 35,
+				creator: users[0]._id
+			}).save();
+			const post3 = await new Post({
+				title: 'post 3',
+				body: 'body 3',
+				readCount: 500,
+				creator: users[1]._id
+			}).save();
 
-			const mapReduce = {};
+			// Had to stringify the function manually because of how mocha
+			// works to stringify your function.
+			// https://github.com/Automattic/mongoose/issues/2293
+			// const map = () => { emit(this.title, 1); };
+			// const reduce = (key, values) => values.reduce((a, b) => a + b, 0);
+			const mapReduce: any = {
+				map: `function() { emit(this.title, 1); }`,
+				reduce: `function(key, values) { return values.reduce((a, b) => a + b, 0) }`
+			};
+			const results = await Post.mapReduce<string, number>(mapReduce);
+			expect(results.length).to.be.equal(2);
+			expect(results[0].value).to.be.equal(2);
+			expect(results[1].value).to.be.equal(1);
+
+			debugger;
+
+			await Post.remove();
 		});
 
 		it.skip('public static geoNear()', async () => {

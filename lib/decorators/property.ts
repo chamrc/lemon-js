@@ -1,32 +1,18 @@
-import { Schema } from 'mongoose';
+import { Schema, SchemaTypeOpts } from 'mongoose';
 import 'reflect-metadata';
 import { TypedModel } from '../model';
 
-export interface SchemaOptions {
+export interface SchemaTypeOptions<T> extends SchemaTypeOpts<T> {
 	// From lemon-js
-	refer?: Function;
-	// From Mongoose
-	ref?: Function;
-	required?: boolean;
-	default?: any;
-	select?: boolean;
-	validate?: Function;
-	get?: Function;
-	set?: Function;
-	alias?: string;
-	index?: boolean;
-	unique?: boolean;
-	sparse?: boolean;
-	lowercase?: boolean;
-	uppercase?: boolean;
-	trim?: boolean;
-	match?: RegExp;
-	enum?: [any];
-	min?: number;
-	max?: number;
+	refer?: Constructor;
+	ref?: Constructor;
 }
 
-export type PropertyMetaType = SchemaOptions
+export type Constructor = {
+	new(...args): any
+};
+
+export type PropertyMetaType<T> = SchemaTypeOptions<T>
 	| [any]
 	| boolean
 	| Boolean
@@ -49,12 +35,12 @@ export type PropertyMetaType = SchemaOptions
 	| Schema.Types.String
 	| any;
 
-export function property(target: TypedModel, propertyKey: string): void;
-export function property(
-	meta: SchemaOptions
+export function property<T>(target: TypedModel, propertyKey: string): void;
+export function property<T>(
+	meta: SchemaTypeOptions<T>
 ): (target: TypedModel, propertyKey: string) => void;
-export function property(
-	targetOrMeta: TypedModel | SchemaOptions,
+export function property<T>(
+	targetOrMeta: TypedModel | SchemaTypeOptions<T>,
 	propertyKey?: string,
 ) {
 	if (targetOrMeta instanceof TypedModel) {
@@ -89,7 +75,7 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 		} else {
 			const name = constructor.name;
 			throw new Error(
-				`Type of ${name}.${propertyKey} isn't set. Uf you use typescript ` +
+				`Type of ${ name }.${ propertyKey } isn't set. Uf you use typescript ` +
 				'you need to enable emitDecoratorMetadata in tsconfig.json',
 			);
 		}

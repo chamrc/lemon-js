@@ -1,4 +1,4 @@
-import { model, property, Query, Ref, TypedModel } from '../../';
+import { model, property, Query, TypedModel } from '../../';
 
 @model
 export class Permission extends TypedModel {

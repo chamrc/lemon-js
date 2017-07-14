@@ -9,7 +9,7 @@ import {
 	Query,
 	SaveOptions,
 	Schema,
-	ValidationError,
+	ValidationError
 } from 'mongoose';
 
 export interface IModelType<T extends TypedModel> {
@@ -21,7 +21,7 @@ export interface IMeta {
 	schemaOptions: any;
 }
 
-export type Ref<T> = T | string;
+export type ModelMapReduceOption<T, Key, Value> = ModelMapReduceOption<T, Key, Value>;
 
 export class TypedModel {
 	protected static _model: MongooseModel<Document>;

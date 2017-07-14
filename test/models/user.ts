@@ -1,5 +1,5 @@
 import { Permission, Post } from '.';
-import { model, property, Query, Ref, TypedModel } from '../../';
+import { model, property, Query, TypedModel } from '../../';
 
 @model
 export class User extends TypedModel {
@@ -11,7 +11,7 @@ export class User extends TypedModel {
 	@property({ unique: true }) public name: string;
 
 	public get displayName() {
-		return `${this.name} <${this.email}>`;
+		return `${ this.name } <${ this.email }>`;
 	}
 
 	public static findByEmail(email: string): Query<User> {
