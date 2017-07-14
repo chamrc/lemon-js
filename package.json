@@ -15,7 +15,7 @@
 		"integration": "npm run tslint && node_modules/.bin/mocha --no-timeouts --reporter mocha-circleci-reporter mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk"
 	},
-	"typings": "./dist/index.d.ts",
+	"typings": "./index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/chamrc/lemon-js.git"

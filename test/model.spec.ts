@@ -1,3 +1,5 @@
+/// <reference path='../index.d.ts'/>
+
 import { expect } from 'chai';
 import { ModelMapReduceOption } from '../lib';
 import { Post, User } from './models';
@@ -376,11 +378,80 @@ describe('Model:', () => {
 				creator: users[1]._id
 			}).save();
 
-			// Had to stringify the function manually because of how mocha
-			// works to stringify your function.
-			// https://github.com/Automattic/mongoose/issues/2293
-			// const map = () => { emit(this.title, 1); };
-			// const reduce = (key, values) => values.reduce((a, b) => a + b, 0);
+			const map = function () { emit(this.title, 1); };
+			const reduce = function (key, values) { return values.reduce((a, b) => a + b, 0); };
+			const mapReduce = {
+				map: map,
+				reduce: reduce
+			};
+			const results = await Post.mapReduce<string, number>(mapReduce);
+			expect(results.length).to.be.equal(2);
+			expect(results[0].value).to.be.equal(2);
+			expect(results[1].value).to.be.equal(1);
+
+			await Post.remove();
+		});
+
+		it('public static mapReduce() using relationship', async () => {
+			const users = await User.find<User[]>({});
+
+			const post1 = await new Post({
+				title: 'post',
+				body: 'body 1',
+				readCount: 25,
+				creator: users[0]._id
+			}).save();
+			const post2 = await new Post({
+				title: 'post',
+				body: 'body 2',
+				readCount: 35,
+				creator: users[0]._id
+			}).save();
+			const post3 = await new Post({
+				title: 'post 3',
+				body: 'body 3',
+				readCount: 500,
+				creator: users[1]._id
+			}).save();
+
+			const map = function () { emit(this.creator, this.readCount); };
+			const reduce = function (key, values) { return values.reduce((a, b) => a + b, 0); };
+			const mapReduce = {
+				map: map,
+				reduce: reduce
+			};
+			debugger;
+			const results = await Post.mapReduce<string, number>(mapReduce);
+			debugger;
+			expect(results.length).to.be.equal(2);
+			expect(results[0].value).to.be.equal(60);
+			expect(results[1].value).to.be.equal(500);
+
+			await Post.remove();
+		});
+
+		it('public static mapReduce() using string', async () => {
+			const users = await User.find<User[]>({});
+
+			const post1 = await new Post({
+				title: 'post',
+				body: 'body 1',
+				readCount: 25,
+				creator: users[0]._id
+			}).save();
+			const post2 = await new Post({
+				title: 'post',
+				body: 'body 2',
+				readCount: 35,
+				creator: users[0]._id
+			}).save();
+			const post3 = await new Post({
+				title: 'post 3',
+				body: 'body 3',
+				readCount: 500,
+				creator: users[1]._id
+			}).save();
+
 			const mapReduce: any = {
 				map: `function() { emit(this.title, 1); }`,
 				reduce: `function(key, values) { return values.reduce((a, b) => a + b, 0) }`
@@ -389,8 +460,6 @@ describe('Model:', () => {
 			expect(results.length).to.be.equal(2);
 			expect(results[0].value).to.be.equal(2);
 			expect(results[1].value).to.be.equal(1);
-
-			debugger;
 
 			await Post.remove();
 		});
