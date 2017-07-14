@@ -11,7 +11,7 @@
 		"prepublish": "npm run build && npm run test",
 		"test": "npm run tslint && npm run mocha",
 		"coverage": "npm run tslint && node_modules/.bin/nyc --reporter=text-lcov --reporter=html --reporter=text mocha -r ts-node/register test/init.ts test/*.spec.ts",
-		"integration": "npm run tslint && node_modules/.bin/nyc --reporter=text-lcov mocha -r ts-node/register test/init.ts test/*.spec.ts",
+		"integration": "npm run tslint && node_modules/.bin/mocha --reporter mocha-circleci-reporter mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk"
 	},
 	"typings": "./dist/index.d.ts",
@@ -45,6 +45,7 @@
 		"chai": "^3.5.0",
 		"codelyzer": "^3.1.2",
 		"mocha": "^3.4.2",
+		"mocha-circleci-reporter": "0.0.2",
 		"mongoose": "^4.11.1",
 		"nyc": "^11.0.3",
 		"reflect-metadata": "*",
