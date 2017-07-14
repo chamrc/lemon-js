@@ -17,21 +17,20 @@ jobs:
 
     steps:
       - checkout
-
-    #   - run:
-    #       name: Update npm
-    #       command: 'sudo npm install -g npm@latest'
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: Install npm
+          name: npm install
           command: npm install
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
             - ./node_modules
       - run:
-          name: Test
+          name: TSLint Test
+          command: npm run tslint
+      - run:
+          name: Integration Test
           command: npm run integration
       - store_artifacts:
           path: test-results.xml
