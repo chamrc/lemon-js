@@ -5,10 +5,10 @@ import { model, property, Query, Ref, TypedModel } from '../../';
 export class User extends TypedModel {
 	@property public age: number;
 	@property public createdAt: Date;
-	@property public email: string;
+	@property({ index: true }) public email: string;
 	@property({ refer: Permission }) public permissions: [Permission];
 	@property({ default: false }) public isActive: boolean;
-	@property public name: string;
+	@property({ unique: true }) public name: string;
 
 	public get displayName() {
 		return `${this.name} <${this.email}>`;

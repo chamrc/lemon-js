@@ -3,3 +3,5 @@ node_modules
 npm-debug.log
 dist
 package-lock.json
+coverage
+.nyc_output

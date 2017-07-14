@@ -1,16 +1,18 @@
 {
 	"name": "lemon-js",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "Define your mongoose models easily with Typescript",
 	"main": "./dist/index.js",
 	"scripts": {
+		"build": "node_modules/.bin/tsc",
+		"mocha": "node_modules/.bin/mocha -r ts-node/register test/init.ts test/*.spec.ts",
+		"tslint": "node_modules/.bin/tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts",
+		"watch": "node_modules/.bin/tsc -w",
 		"prepublish": "npm run build && npm run test",
-		"build": "tsc",
-		"mocha": "mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"test": "npm run tslint && npm run mocha",
-		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk",
-		"watch": "tsc -w",
-		"tslint": "tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts"
+		"coverage": "npm run tslint && node_modules/.bin/nyc --reporter=text-lcov --reporter=html --reporter=text mocha -r ts-node/register test/init.ts test/*.spec.ts",
+		"integration": "npm run tslint && node_modules/.bin/nyc --reporter=text-lcov mocha -r ts-node/register test/init.ts test/*.spec.ts",
+		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk"
 	},
 	"typings": "./dist/index.d.ts",
 	"repository": {
@@ -44,6 +46,7 @@
 		"codelyzer": "^3.1.2",
 		"mocha": "^3.4.2",
 		"mongoose": "^4.11.1",
+		"nyc": "^11.0.3",
 		"reflect-metadata": "*",
 		"ts-node": "^3.2.0",
 		"tslint": "^5.5.0",

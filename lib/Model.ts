@@ -77,7 +77,7 @@ export class TypedModel {
 	/**
 	 * Returns Model class
 	 */
-	public static get Model(): MongooseModel<Document> {
+	public static getmodel(): MongooseModel<Document> {
 		return this._model;
 	}
 
@@ -107,18 +107,6 @@ export class TypedModel {
 	}
 
 	/**
-	 * Finds a single document by its _id field. findById(id) is almost*
-	 * equivalent to findOne({ _id: id }). findById() triggers findOne hooks.
-	 */
-	public static findById<T extends TypedModel>(
-		id: object | string | number,
-		projection?: object,
-		options?: object,
-	): Query<T> {
-		return this.fromQuery(this._model.findById(id, projection, options));
-	}
-
-	/**
 	 * Finds one document. The conditions are cast to their respective
 	 * SchemaTypes before the command is sent.
 	 */
@@ -128,6 +116,18 @@ export class TypedModel {
 		options?: object,
 	): Query<T> {
 		return this.fromQuery(this._model.findOne(conditions, projection, options));
+	}
+
+	/**
+	 * Finds a single document by its _id field. findById(id) is almost*
+	 * equivalent to findOne({ _id: id }). findById() triggers findOne hooks.
+	 */
+	public static findById<T extends TypedModel>(
+		id: object | string | number,
+		projection?: object,
+		options?: object,
+	): Query<T> {
+		return this.fromQuery(this._model.findById(id, projection, options));
 	}
 
 	/**
@@ -229,8 +229,8 @@ export class TypedModel {
 	 * document.
 	 * This function does not trigger save middleware.
 	 */
-	public static async insertMany<T extends TypedModel>(docs: any): Promise<T>;
-	public static async insertMany<T extends TypedModel>(docs: any[]): Promise<T[]> {
+	public static async insertMany<T extends TypedModel>(docs: any[]): Promise<T[]>;
+	public static async insertMany<T extends TypedModel>(docs: any): Promise<T> {
 		return this.parseResult(await this._model.insertMany(docs)) as any;
 	}
 
