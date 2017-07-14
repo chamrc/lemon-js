@@ -9,6 +9,7 @@ import {
 	Query,
 	SaveOptions,
 	Schema,
+	Types as MongooseTypes,
 	ValidationError
 } from 'mongoose';
 
@@ -77,14 +78,14 @@ export class TypedModel {
 	/**
 	 * Returns Model class
 	 */
-	public static getmodel(): MongooseModel<Document> {
+	public static getModel(): MongooseModel<Document> {
 		return this._model;
 	}
 
 	/**
 	 * Returns schema instance
 	 */
-	public static get schema(): Schema {
+	public static getSchema(): Schema {
 		return this._schema;
 	}
 

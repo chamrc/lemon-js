@@ -10,12 +10,12 @@
 		"watch": "node_modules/.bin/tsc -w",
 		"prepublish": "npm run build && npm run publishtest",
 		"publishtest": "npm run tslint && npm run mocha -- --no-timeouts",
-		"test": "npm run tslint && npm run mocha",
+		"test": "npm run tslint && node_modules/.bin/nyc --reporter=text mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"coverage": "node_modules/.bin/nyc --reporter=text-lcov --reporter=html --reporter=text mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"integration": "npm run tslint && node_modules/.bin/mocha --no-timeouts --reporter mocha-circleci-reporter mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"debug": "npm run tslint && npm run mocha -- --inspect --inspect-brk"
 	},
-	"typings": "./index.d.ts",
+	"typings": "./dist/index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/chamrc/lemon-js.git"

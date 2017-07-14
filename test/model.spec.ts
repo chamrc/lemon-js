@@ -1,6 +1,8 @@
-/// <reference path='../index.d.ts'/>
+
+declare function emit(k, v): void;
 
 import { expect } from 'chai';
+import { Types } from 'mongoose';
 import { ModelMapReduceOption } from '../lib';
 import { Post, User } from './models';
 
@@ -78,46 +80,64 @@ describe('Model:', () => {
 	});
 
 	describe('Accessors:', () => {
-		it.skip('public get document()', async () => {
-
+		it('public get document()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.document).to.be.not.null;
 		});
 
-		it.skip('public get _id()', async () => {
-
+		it('public get _id()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user._id).to.be.not.null;
 		});
 
-		it.skip('public set _id()', async () => {
-
+		it('public set _id()', async () => {
+			const user = await User.findByEmail(email1);
+			const oldId = user._id;
+			expect(user._id).to.be.not.null;
+			const newId = new Types.ObjectId('51bb793aca2ab77a3200000d');
+			user._id = newId;
+			expect(user._id).to.be.not.equal(oldId);
 		});
 
-		it.skip('public get __v()', async () => {
-
+		it('public get __v()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.__v).to.be.not.null;
 		});
 
-		it.skip('public set __v()', async () => {
-
+		it('public set __v()', async () => {
+			const user = await User.findByEmail(email1);
+			const oldV = user.__v;
+			expect(user.__v).to.be.not.null;
+			user.__v = 22312312;
+			expect(user.__v).to.be.not.equal(oldV);
 		});
 
-		it.skip('public get id()', async () => {
-
+		it('public get id()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.id).to.be.not.null;
 		});
 
-		it.skip('public get isNew()', async () => {
-
+		it('public get isNew()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.isNew).to.be.false;
 		});
 	});
 
 	describe('Static methods:', () => {
-		it.skip('public static getmodel()', async () => {
-
+		it('public static getModel()', async () => {
+			expect(User.getModel()).to.be.not.null;
 		});
 
-		it.skip('public static get schema()', async () => {
-
+		it('public static getSchema()', async () => {
+			expect(User.getSchema()).to.be.not.null;
 		});
 
-		it.skip('public static remove()', async () => {
-
+		it('public static remove()', async () => {
+			let user = await User.findByEmail(email1);
+			expect(user.isNew).to.be.not.null;
+			User.remove();
+			user = await User.findByEmail(email1);
+			expect(user.isNew).to.be.false;
 		});
 
 		it('public static find()', async () => {
@@ -420,9 +440,7 @@ describe('Model:', () => {
 				map: map,
 				reduce: reduce
 			};
-			debugger;
 			const results = await Post.mapReduce<string, number>(mapReduce);
-			debugger;
 			expect(results.length).to.be.equal(2);
 			expect(results[0].value).to.be.equal(60);
 			expect(results[1].value).to.be.equal(500);
@@ -473,6 +491,116 @@ describe('Model:', () => {
 		});
 
 		it.skip('public static geoSearch()', async () => {
+
+		});
+	});
+
+	describe('Instance methods:', () => {
+		it.skip('public $isDefault()', async () => {
+
+		});
+
+		it.skip('public depopulate()', async () => {
+
+		});
+
+		it.skip('public equals()', async () => {
+
+		});
+
+		it.skip('public async execPopulate()', async () => {
+
+		});
+
+		it.skip('public get()', async () => {
+
+		});
+
+		it.skip('public init()', async () => {
+
+		});
+
+		it.skip('public inspect()', async () => {
+
+		});
+
+		it.skip('public invalidate()', async () => {
+
+		});
+
+		it.skip('public isDirectModified()', async () => {
+
+		});
+
+		it.skip('public isInit()', async () => {
+
+		});
+
+		it.skip('public isModified()', async () => {
+
+		});
+
+		it.skip('public isSelected()', async () => {
+
+		});
+
+		it.skip('public markModified()', async () => {
+
+		});
+
+		it.skip('public modifiedPaths()', async () => {
+
+		});
+
+		it.skip('public populate()', async () => {
+
+		});
+
+		it.skip('public populated()', async () => {
+
+		});
+
+		it.skip('public toJSON()', async () => {
+
+		});
+
+		it.skip('public toObject()', async () => {
+
+		});
+
+		it.skip('public toString()', async () => {
+
+		});
+
+		it.skip('public unmarkModified()', async () => {
+
+		});
+
+		it.skip('public validate()', async () => {
+
+		});
+
+		it.skip('public validateSync()', async () => {
+
+		});
+
+		it.skip('public async save()', async () => {
+
+		});
+
+		it.skip('public increment()', async () => {
+
+		});
+
+		it.skip('public remove()', async () => {
+
+		});
+
+		it.skip('public async update()', async () => {
+
+		});
+
+		it.skip('public set()', async () => {
 
 		});
 	});
