@@ -120,14 +120,14 @@ describe('Model:', () => {
 		it('public static find()', async () => {
 			const users = await User.find<User[]>({ email: email1 }).limit(1);
 			expect(users.length).to.be.equal(1);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 		});
 
 		it('public static findOne()', async () => {
 			const user = await User.findOne<User>({ email: email1 }).limit(1);
 			expect(user).to.not.be.null;
 			expect(user._id).to.not.be.null;
-			expect(user.displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(user.displayName).to.be.equal(`User 1 <${ email1 }>`);
 		});
 
 		it('public static findById()', async () => {
@@ -135,13 +135,13 @@ describe('Model:', () => {
 			expect(refUser).to.not.be.null;
 			expect(refUser._id).to.not.be.null;
 			const user = await User.findById<User>(refUser._id);
-			expect(user.displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(user.displayName).to.be.equal(`User 1 <${ email1 }>`);
 		});
 
 		it('public static count()', async () => {
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
@@ -172,7 +172,7 @@ describe('Model:', () => {
 
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${newEmail}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ newEmail }>`);
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
@@ -188,7 +188,7 @@ describe('Model:', () => {
 
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${newEmail}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ newEmail }>`);
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
@@ -232,9 +232,9 @@ describe('Model:', () => {
 
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(4);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[1].name).to.be.equal('User 2');
-			expect(users[2].displayName).to.be.equal(`User 3 <${email3}>`);
+			expect(users[2].displayName).to.be.equal(`User 3 <${ email3 }>`);
 			expect(users[3].name).to.be.equal('User 5');
 		});
 
@@ -254,9 +254,9 @@ describe('Model:', () => {
 
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(4);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[1].name).to.be.equal('User 2');
-			expect(users[2].displayName).to.be.equal(`User 3 <${email3}>`);
+			expect(users[2].displayName).to.be.equal(`User 3 <${ email3 }>`);
 			expect(users[3].name).to.be.equal('User 5');
 		});
 
@@ -269,19 +269,19 @@ describe('Model:', () => {
 				email: email3,
 				name: 'User 3'
 			});
-			expect(user.displayName).to.be.equal(`User 3 <${email3}>`);
+			expect(user.displayName).to.be.equal(`User 3 <${ email3 }>`);
 			expect(user._id.toString()).to.be.equal(userId);
 
 			const users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
 		it('public static update()', async () => {
 			let users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.false;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -290,7 +290,7 @@ describe('Model:', () => {
 
 			users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.true;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -299,7 +299,7 @@ describe('Model:', () => {
 		it('public static updateMany()', async () => {
 			let users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.false;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -308,7 +308,7 @@ describe('Model:', () => {
 
 			users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.true;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.true;
@@ -317,7 +317,7 @@ describe('Model:', () => {
 		it('public static updateOne()', async () => {
 			let users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.false;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -326,7 +326,7 @@ describe('Model:', () => {
 
 			users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.true;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -335,7 +335,7 @@ describe('Model:', () => {
 		it('public static replaceOne()', async () => {
 			let users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 1 <${email1}>`);
+			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.false;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
@@ -349,7 +349,7 @@ describe('Model:', () => {
 
 			users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
-			expect(users[0].displayName).to.be.equal(`User 3 <${email3}>`);
+			expect(users[0].displayName).to.be.equal(`User 3 <${ email3 }>`);
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
