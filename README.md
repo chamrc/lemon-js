@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/chamrc/lemon-js.svg?branch=master)](https://travis-ci.org/chamrc/lemon-js)
+[![NPM version](https://badge.fury.io/js/lemon-js.svg)](https://badge.fury.io/js/lemon-js)
+[![Dependencies status](https://david-dm.org/chamrc/lemon-js/status.svg)](https://david-dm.org/chamrc/lemon-js)
+
 ## Installation
 
 Install with [npm](https://npmjs.org/package/lemon-js):
@@ -93,4 +97,4 @@ Licensed under MIT.
 
 ## Credits
 
-Based on the work of @megahertz/mongoose-model
+Based on the work of @chamrc/lemon-js

@@ -448,39 +448,39 @@ describe('Model:', () => {
 			await Post.remove();
 		});
 
-		it('public static mapReduce() using string', async () => {
-			const users = await User.find<User[]>({});
+		// it.skip('public static mapReduce() using string', async () => {
+		// 	const users = await User.find<User[]>({});
 
-			const post1 = await new Post({
-				title: 'post',
-				body: 'body 1',
-				readCount: 25,
-				creator: users[0]._id
-			}).save();
-			const post2 = await new Post({
-				title: 'post',
-				body: 'body 2',
-				readCount: 35,
-				creator: users[0]._id
-			}).save();
-			const post3 = await new Post({
-				title: 'post 3',
-				body: 'body 3',
-				readCount: 500,
-				creator: users[1]._id
-			}).save();
+		// 	const post1 = await new Post({
+		// 		title: 'post',
+		// 		body: 'body 1',
+		// 		readCount: 25,
+		// 		creator: users[0]._id
+		// 	}).save();
+		// 	const post2 = await new Post({
+		// 		title: 'post',
+		// 		body: 'body 2',
+		// 		readCount: 35,
+		// 		creator: users[0]._id
+		// 	}).save();
+		// 	const post3 = await new Post({
+		// 		title: 'post 3',
+		// 		body: 'body 3',
+		// 		readCount: 500,
+		// 		creator: users[1]._id
+		// 	}).save();
 
-			const mapReduce: any = {
-				map: `function() { emit(this.title, 1); }`,
-				reduce: `function(key, values) { return values.reduce((a, b) => a + b, 0) }`
-			};
-			const results = await Post.mapReduce<string, number>(mapReduce);
-			expect(results.length).to.be.equal(2);
-			expect(results[0].value).to.be.equal(2);
-			expect(results[1].value).to.be.equal(1);
+		// 	const mapReduce: any = {
+		// 		map: `function() { emit(this.title, 1); }`,
+		// 		reduce: `function(key, values) { return values.reduce((a, b) => a + b, 0) }`
+		// 	};
+		// 	const results = await Post.mapReduce<string, number>(mapReduce);
+		// 	expect(results.length).to.be.equal(2);
+		// 	expect(results[0].value).to.be.equal(2);
+		// 	expect(results[1].value).to.be.equal(1);
 
-			await Post.remove();
-		});
+		// 	await Post.remove();
+		// });
 
 		it.skip('public static geoNear()', async () => {
 
