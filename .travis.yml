@@ -4,6 +4,6 @@ services:
 language: node_js
 node_js:
   - "node"
-
 matrix:
   fast_finish: true
+after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

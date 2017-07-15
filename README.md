@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/chamrc/lemon-js.svg?branch=master)](https://travis-ci.org/chamrc/lemon-js)
 [![NPM version](https://badge.fury.io/js/lemon-js.svg)](https://badge.fury.io/js/lemon-js)
 [![Dependencies status](https://david-dm.org/chamrc/lemon-js/status.svg)](https://david-dm.org/chamrc/lemon-js)
+[![Coverage Status](https://coveralls.io/repos/github/chamrc/lemon-js/badge.svg?branch=master)](https://coveralls.io/github/chamrc/lemon-js?branch=master)
 
 ## Installation
 
