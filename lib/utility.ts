@@ -1,3 +1,5 @@
+import { TypedModel } from '..';
+
 function mapValuesOfObject(obj, deepMapper) {
 	return Object.keys(obj).reduce((res, key) => {
 		res[key] = deepMapper(obj[key], key, obj);
@@ -37,7 +39,8 @@ export function deepMapKeys(obj, fn) {
 		for (const key in obj) {
 			if (obj.hasOwnProperty(key)) {
 				const val = obj[key];
-				if (typeof val === 'function') {
+				if (typeof val === 'function' ||
+					(val.constructor && typeof val.constructor === 'function')) {
 					res[key] = val;
 				} else if (Array.isArray(val)) {
 					res[key] = val.map((value, idx) => isObject(value) ? deepMapKeys(value, fn) : value);
@@ -51,4 +54,8 @@ export function deepMapKeys(obj, fn) {
 
 		return res;
 	}
+}
+
+export function isTypedModel(obj: any) {
+	return obj && (obj._meta || obj._model || obj._schema);
 }

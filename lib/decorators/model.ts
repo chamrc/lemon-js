@@ -65,12 +65,10 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 		},
 	});
 
-	let result: SchemaTypeOptions<T> = deepMapKeys(options, (val, key) => key === 'refer' ? 'ref' : key);
-	result = deepMapValues(result, (val, key, ctx) => {
+	const result = deepMapValues(options, (val, key, ctx) => {
 		if (key === 'ref') return val._meta && val.name ? val.name : val;
-		else if (key === 'type') return ctx.ref && ctx.ref._meta && ctx.ref.name ? Schema.Types.ObjectId : val;
 		else return val;
 	});
 
-	return (options.type as any === Array) ? [result] : result;
+	return result;
 }

@@ -48,6 +48,8 @@ describe('Model relations', () => {
 		expect(user.name).to.be.equal('User 1');
 		expect(user.permissions.length).to.be.equal(2);
 		expect(user.permissions[0].name).to.be.equal('read');
+		expect(user.permissions[0].document).to.be.not.null;
 		expect(user.permissions[1].name).to.be.equal('write');
+		expect(user.permissions[1].document).to.be.not.null;
 	});
 });
