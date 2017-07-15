@@ -40,7 +40,7 @@ export function deepMapKeys(obj, fn) {
 				if (typeof val === 'function') {
 					res[key] = val;
 				} else if (Array.isArray(val)) {
-					res[key] = val.map((value, idx) => mapKeys(value, fn));
+					res[key] = val.map((value, idx) => isObject(value) ? deepMapKeys(value, fn) : value);
 				} else if (isObject(val)) {
 					res[key] = deepMapKeys(val, fn);
 				} else {
