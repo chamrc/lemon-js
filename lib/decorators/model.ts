@@ -45,6 +45,9 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 		get() {
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
+			// TODO: support subdoc
+
+			debugger;
 
 			if (value && (options.refer || options.ref)) {
 				let ValueType = options.ref ? options.ref : options.refer;
@@ -66,15 +69,12 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 		},
 	});
 
-	debugger;
 	let result: SchemaTypeOptions<T> = deepMapKeys(options, (val, key) => key === 'refer' ? 'ref' : key);
-	debugger;
-	result = deepMapValues(result, (val, key) => {
+	result = deepMapValues(result, (val, key, ctx) => {
 		if (key === 'ref') return val._meta && val.name ? val.name : val;
-		else if (key === 'type') return val._meta && val.name ? Schema.Types.ObjectId : val;
+		else if (key === 'type') return ctx.ref && ctx.ref._meta && ctx.ref.name ? Schema.Types.ObjectId : val;
 		else return val;
 	});
-	debugger;
 
-	return result;
+	return (options.type as any === Array) ? [result] : result;
 }

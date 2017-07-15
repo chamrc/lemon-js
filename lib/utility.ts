@@ -1,24 +1,24 @@
 function mapValuesOfObject(obj, deepMapper) {
 	return Object.keys(obj).reduce((res, key) => {
-		res[key] = deepMapper(obj[key], key);
+		res[key] = deepMapper(obj[key], key, obj);
 		return res;
 	}, {});
 }
 
 export function deepMapValues(obj, fn) {
-	const deepMapper = (val, key, arr) => typeof val === 'object' ? deepMapValues(val, fn) : fn(val, key);
+	const deepMapper = (val, key, ctx) => typeof val === 'object' ? deepMapValues(val, fn) : fn(val, key, ctx);
 	if (Array.isArray(obj)) return obj.map(deepMapper);
 	if (typeof obj === 'object') return mapValuesOfObject(obj, deepMapper);
 	return obj;
 }
 
-function mapKeys(object, iteratee) {
+function mapKeys(object, fn) {
 	object = Object(object);
 	const result = {};
 
 	Object.keys(object).forEach((key) => {
 		const value = object[key];
-		result[iteratee(value, key, object)] = value;
+		result[fn(value, key, object)] = value;
 	});
 	return result;
 }

@@ -43,7 +43,9 @@ describe('Model relations', () => {
 	});
 
 	it('should allow to populate array of related models', async () => {
+		debugger;
 		const user = await User.findByEmail('user1@example.com').populate('permissions').exec();
+		debugger;
 
 		expect(user.name).to.be.equal('User 1');
 		expect(user.permissions.length).to.be.equal(2);

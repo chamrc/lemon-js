@@ -109,7 +109,6 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 			};
 		}
 
-		debugger;
 		meta.validate = newValidate;
 	}
 
