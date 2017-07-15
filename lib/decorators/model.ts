@@ -31,8 +31,6 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 		return result;
 	}, {});
 
-	debugger;
-
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
 	cls.initSchema();
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
@@ -46,8 +44,6 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
 			// TODO: support subdoc
-
-			debugger;
 
 			if (value && (options.refer || options.ref)) {
 				let ValueType = options.ref ? options.ref : options.refer;
