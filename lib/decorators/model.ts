@@ -1,7 +1,7 @@
 import { model as mongooseModel, Schema } from 'mongoose';
 import * as pluralize from 'pluralize';
 import { SchemaTypeOptions } from '.';
-import { TypedModel } from '../model';
+import { deepMapKeys, deepMapValues, TypedModel } from '..';
 
 export function model(constructor: typeof TypedModel);
 export function model(options: object);
@@ -30,6 +30,8 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 		result[key] = initProp(key, properties[key], constructor);
 		return result;
 	}, {});
+
+	debugger;
 
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
 	cls.initSchema();
@@ -64,17 +66,15 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 		},
 	});
 
-	const result: SchemaTypeOptions<T> = { ...options };
-
-	if (options.refer || options.ref) {
-		result.type = Schema.Types.ObjectId as any;
-		result.ref = <any>(options.ref ? options.ref.name : options.refer.name);
-		delete result.refer;
-
-		if (options.type as any === Array) {
-			return [result];
-		}
-	}
+	debugger;
+	let result: SchemaTypeOptions<T> = deepMapKeys(options, (val, key) => key === 'refer' ? 'ref' : key);
+	debugger;
+	result = deepMapValues(result, (val, key) => {
+		if (key === 'ref') return val._meta && val.name ? val.name : val;
+		else if (key === 'type') return val._meta && val.name ? Schema.Types.ObjectId : val;
+		else return val;
+	});
+	debugger;
 
 	return result;
 }
