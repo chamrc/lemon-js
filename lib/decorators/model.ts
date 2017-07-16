@@ -1,6 +1,6 @@
 import { model as mongooseModel, Schema } from 'mongoose';
 import * as pluralize from 'pluralize';
-import { SchemaTypeOptions } from '.';
+import { MethodSignature, SchemaTypeOptions } from '.';
 import { deepMapKeys, deepMapValues, isTypedModel, TypedModel } from '..';
 
 export function model(constructor: typeof TypedModel);
@@ -32,7 +32,46 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 		return result;
 	}, {});
 
+
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
+	if (cls._schema && cls._sign) {
+		(cls._sign as [MethodSignature]).forEach(methodSign => {
+			/************************************************
+			 *
+			 * Push validators from method to
+			 * validators from properties
+			 *
+			 ************************************************/
+			let props = methodSign.validate.properties;
+			props.forEach(path => {
+				let propConfig = cls._schema.path(path);
+				if (propConfig && propConfig.validators) {
+					propConfig.validators.push({
+						type: 'user defined',
+						message: methodSign.validate.message,
+						// isAsync: methodSign.validate.validator.length === 2,
+						validator: methodSign.validate.validator
+					});
+				}
+			});
+
+			/************************************************
+			 *
+			 * Add middlewares to pre and post hooks
+			 *
+			 ************************************************/
+			let mids = methodSign.middlewares;
+			let types = ['pre', 'post'];
+			types.forEach(type => {
+				let paths = mids[type];
+				paths.forEach(path => {
+					cls._schema[type](path, mids.function);
+				});
+			});
+		});
+	}
+
+
 	cls.initSchema();
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
@@ -44,7 +83,6 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: Sc
 		get() {
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
-			// TODO: support subdoc
 
 			let SavedTypedModel;
 			if (value && rawOptions.ref && isTypedModel(rawOptions.ref)) {

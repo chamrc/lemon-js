@@ -4,7 +4,7 @@
 	"description": "Define your mongoose models easily with Typescript",
 	"main": "./dist/index.js",
 	"scripts": {
-		"build": "node_modules/.bin/tsc",
+		"build": "rm -rf dist && node_modules/.bin/tsc",
 		"mocha": "node_modules/.bin/mocha -r ts-node/register test/init.ts test/*.spec.ts",
 		"tslint": "node_modules/.bin/tslint -t verbose index.ts lib/*.ts lib/**/*.ts test/*.ts test/**/*.ts",
 		"watch": "node_modules/.bin/tsc -w",

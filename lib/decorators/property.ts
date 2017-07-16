@@ -94,7 +94,6 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 		meta = deepMapValues(meta, (val, key, ctx) => {
 			if (key === 'ref') {
 				if (!isTypedModel(val)) throw new Error(`Referenced type for ${ propertyKey } is not a subclass of 'TypedModel.'`);
-				// TODO: ref is a reserved keyword.
 				return val.name;
 			}
 			return val;
@@ -121,7 +120,8 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 					// var custom = [validator, 'Uh oh, {PATH} does not equal "something".']
 					// new Schema({ name: { type: String, validate: custom } });
 					newValidate = {
-						validator: wrapValidator(meta.validate[0]),
+						isAsync: meta.validate[0].length === 2,
+						validator: wrapValidator(meta.validate[0], constructor),
 						message: meta.validate[1]
 					};
 				} else {
@@ -132,23 +132,26 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 					// new Schema({ name: { type: String, validate: many } });
 					newValidate = meta.validate.map((x) => {
 						return {
-							validator: wrapValidator(x.validator),
+							isAsync: x.validator.length === 2,
+							validator: wrapValidator(x.validator, constructor),
 							message: x.msg ? x.msg : x.message
 						};
 					});
 				}
 			} else if (typeof meta.validate === 'function') {
 				// new Schema({ name: { type: String, validate: function validator(val) {} } });
-				newValidate = wrapValidator(meta.validate);
+				newValidate = {
+					isAsync: meta.validate.length === 2,
+					message: '',
+					validator: wrapValidator(meta.validate, constructor)
+				};
 			} else {
 				// new Schema({ name: { type: String, validate: {
-				// 	isAsync: true,
-				// 	validator: function validator(val) {}
+				// 	validator: function validator(val, cb) {}
 				// }}});
-				const isAsync = meta.validate.isAsync;
 				newValidate = {
-					isAsync,
-					validator: wrapValidator(meta.validate.validator, isAsync),
+					isAsync: meta.validate.validator.length === 2,
+					validator: wrapValidator(meta.validate.validator, constructor),
 					message: meta.validate.message
 				};
 			}
@@ -209,16 +212,15 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 	}
 }
 
-function wrapValidator(validator, isAsync = false) {
+export function wrapValidator(validator, constructor) {
+	let isAsync = validator.length === 2;
 	if (isAsync) {
 		return function (value, callback) {
-			// Validator format:
-			validator(value, this, callback);
+			return validator.bind(new constructor(this))(value, callback);
 		};
 	} else {
 		return function (value) {
-			// Validator format:
-			return validator(value, this);
+			return validator.bind(new constructor(this))(value);
 		};
 	}
 }

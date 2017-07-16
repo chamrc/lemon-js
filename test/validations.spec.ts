@@ -60,4 +60,24 @@ describe('Model relations', () => {
 			}
 		});
 	});
+
+	it('should validate using @method{ validate}', async () => {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const test = new ValidateTest({
+					email2: '123'
+				});
+				await test.save();
+			} catch (error) {
+				try {
+					const test = new ValidateTest({
+						email4: '123'
+					});
+					await test.save();
+				} catch (error) {
+					resolve();
+				}
+			}
+		});
+	});
 });
