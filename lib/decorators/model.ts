@@ -1,7 +1,7 @@
 import { model as mongooseModel, Schema } from 'mongoose';
 import * as pluralize from 'pluralize';
 import { SchemaTypeOptions } from '.';
-import { deepMapKeys, deepMapValues, TypedModel } from '..';
+import { deepMapKeys, deepMapValues, isTypedModel, TypedModel } from '..';
 
 export function model(constructor: typeof TypedModel);
 export function model(options: object);
@@ -45,15 +45,19 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: Sc
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
 			// TODO: support subdoc
-			// debugger;
 
-			if (value && rawOptions.ref) {
-				debugger;
-				let ValueType = options.ref ? options.ref : options.refer;
+			let SavedTypedModel;
+			if (value && rawOptions.ref && isTypedModel(rawOptions.ref)) {
+				SavedTypedModel = rawOptions.ref;
+			} else if (value && Array.isArray(rawOptions) && rawOptions.length === 1 && isTypedModel(rawOptions[0])) {
+				SavedTypedModel = rawOptions[0].ref;
+			}
+
+			if (value && SavedTypedModel) {
 				if (Array.isArray(value)) {
-					return value.map(r => new ValueType(r));
+					return value.map(r => new SavedTypedModel(r));
 				} else {
-					return new ValueType(value);
+					return new SavedTypedModel(value);
 				}
 			}
 
@@ -67,17 +71,6 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: Sc
 			this._document[name] = value;
 		},
 	});
-
-	// if (options.ref) {
-	// 	debugger;
-	// }
-	// const result = deepMapValues(options, (val, key, ctx) => {
-	// 	if (key === 'ref') return val._meta && val.name ? val.name : val;
-	// 	else return val;
-	// });
-	// if (options.ref) {
-	// 	debugger;
-	// }
 
 	return options;
 }

@@ -42,15 +42,24 @@ export function deepExtendContext(obj, fn, objCtx?, objKey?) {
  ************************************************/
 
 function mapValues(obj, deepMapper) {
-	let result = Object.keys(obj).reduce((res, key) => {
-		res[key] = deepMapper(obj[key], key, obj);
-		return res;
-	}, {});
-	return result;
+	return Object.keys(obj).reduce(
+		(res, key) => {
+			res[key] = deepMapper(obj[key], key, obj);
+			return res;
+		}, {}
+	);
 }
 
 export function deepMapValues(obj, fn) {
-	const deepMapper = (val, key, ctx) => typeof val === 'object' ? deepMapValues(val, fn) : fn(val, key, ctx);
+	const deepMapper = (val, key, ctx) => {
+		if (typeof val === 'object') {
+			ctx[key] = deepMapValues(val, fn);
+			return fn(ctx[key], key, ctx);
+		} else {
+			return fn(val, key, ctx);
+		}
+	};
+
 	if (Array.isArray(obj)) return obj.map(deepMapper);
 	if (typeof obj === 'object') return mapValues(obj, deepMapper);
 	return obj;
@@ -62,42 +71,23 @@ export function deepMapValues(obj, fn) {
  *
  ************************************************/
 
-function mapKeys(object, fn) {
-	object = Object(object);
-	const result = {};
-
-	Object.keys(object).forEach((key) => {
-		const value = object[key];
-		result[fn(value, key, object)] = value;
-	});
-
-	return result;
+function mapKeys(obj, deepMapper, fn) {
+	return Object.keys(obj).reduce(
+		(res, key) => {
+			let newKey = fn(obj[key], key, obj);
+			res[newKey ? newKey : key] = deepMapper(obj[key], key, obj);
+			return res;
+		}, {}
+	);
 }
 
 export function deepMapKeys(obj, fn) {
-	if (!isObject(obj)) {
-		return obj;
-	} else {
-		obj = mapKeys(obj, fn);
-		let res = {};
-		for (const key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				const val = obj[key];
-				if (typeof val === 'function' ||
-					(val.constructor && typeof val.constructor === 'function')) {
-					res[key] = val;
-				} else if (Array.isArray(val)) {
-					res[key] = val.map((value, idx) => isObject(value) ? deepMapKeys(value, fn) : value);
-				} else if (isObject(val)) {
-					res[key] = deepMapKeys(val, fn);
-				} else {
-					res[key] = val;
-				}
-			}
-		}
+	if (!isObject(obj)) return obj;
+	const deepMapper = (val, key, ctx) => (typeof val === 'object') ? deepMapKeys(val, fn) : val;
 
-		return res;
-	}
+	if (Array.isArray(obj)) return obj.map(deepMapper);
+	else if (isObject(obj)) return mapKeys(obj, deepMapper, fn);
+	return obj;
 }
 
 /************************************************
@@ -154,7 +144,7 @@ export function getPath(obj, path) {
 
 /************************************************
  *
- * Deep clone
+ * Deep extend
  *
  ************************************************/
 
@@ -180,25 +170,22 @@ function cloneSpecificValue(val) {
 	}
 }
 
-/**
- * Recursive cloning array.
- */
 function deepCloneArray(arr) {
-	let clone = [];
+	let cloned = [];
 	arr.forEach(function (item, index) {
 		if (typeof item === 'object' && item !== null) {
 			if (Array.isArray(item)) {
-				clone[index] = deepCloneArray(item);
+				cloned[index] = deepCloneArray(item);
 			} else if (isSpecificValue(item)) {
-				clone[index] = cloneSpecificValue(item);
+				cloned[index] = cloneSpecificValue(item);
 			} else {
-				clone[index] = deepExtend({}, item);
+				cloned[index] = deepExtend({}, item);
 			}
 		} else {
-			clone[index] = item;
+			cloned[index] = item;
 		}
 	});
-	return clone;
+	return cloned;
 }
 
 function deepExtend(...params: any[]) {
@@ -215,7 +202,7 @@ function deepExtend(...params: any[]) {
 	// convert arguments to array and cut off target object
 	let args = Array.prototype.slice.call(arguments, 1);
 
-	let val, src, clone;
+	let val, src;
 
 	args.forEach(function (obj) {
 		// skip argument if isn't an object, is null, or is an array
@@ -239,7 +226,7 @@ function deepExtend(...params: any[]) {
 				target[key] = val;
 				return;
 
-				// just clone arrays (and recursive clone objects inside)
+				// just cloned arrays (and recursive cloned objects inside)
 			} else if (Array.isArray(val)) {
 				target[key] = deepCloneArray(val);
 				return;

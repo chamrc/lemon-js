@@ -58,22 +58,50 @@ describe('Model relations', () => {
 	});
 
 	it('should save data in a single sub-document', async () => {
-		const house = await House.find({ name: 'home' });
+		const house: House = await House.findOne({ name: 'home' }) as House;
 		expect(house).to.be.not.null;
+		expect(house.car).to.be.not.null;
+		expect(house.car.make).to.be.equal('BMW');
+		expect(house.car.color).to.be.not.null;
+		expect(house.car.color.r).to.be.equal(255);
 	});
 
-	it.skip('should save data in an array of sub-documents', async () => {
-		const house = await House.find({ name: 'home' });
+	it('should save data in an array of sub-documents', async () => {
+		const house: House = await House.findOne({ name: 'home' }) as House;
 		expect(house).to.be.not.null;
+		expect(house.rooms).to.be.not.null;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].color).to.be.not.null;
+		expect(house.rooms[0].color.g).to.be.equal(255);
+		expect(house.rooms[1].color).to.be.not.null;
+		expect(house.rooms[1].color.b).to.be.equal(255);
 	});
 
-	it.skip('should allow to populate related model in sub-document', async () => {
-		const house = await House.find({ name: 'home' });
+	it('should allow to populate related model in sub-document', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.owner').exec() as House;
+
 		expect(house).to.be.not.null;
+		expect(house.rooms).to.be.not.null;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].owner.document).to.be.not.null;
+		expect(house.rooms[0].owner).to.be.not.null;
+		expect(house.rooms[0].owner.name).to.be.equal('Wife');
+		expect(house.rooms[1].owner.document).to.be.not.null;
+		expect(house.rooms[1].owner).to.be.not.null;
+		expect(house.rooms[1].owner.name).to.be.equal('Husband');
 	});
 
-	it.skip('should allow to populate array of related models in sub-document', async () => {
-		const house = await House.find({ name: 'home' });
+	it('should allow to populate array of related models in sub-document', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('car.users').exec() as House;
 		expect(house).to.be.not.null;
+		expect(house.car).to.be.not.null;
+		expect(house.car.users).to.be.not.null;
+		expect(house.car.users.length).to.be.equal(2);
+		expect(house.car.users[0].document).to.be.not.null;
+		expect(house.car.users[0]).to.be.not.null;
+		expect(house.car.users[0].name).to.be.equal('Wife');
+		expect(house.car.users[1].document).to.be.not.null;
+		expect(house.car.users[1]).to.be.not.null;
+		expect(house.car.users[1].name).to.be.equal('Husband');
 	});
 });

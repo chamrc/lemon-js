@@ -63,18 +63,14 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 	// Map all refer (as a alias) to ref
 	meta = deepMapKeys(meta, (val, key) => key === 'refer' ? 'ref' : key);
 
-	if (meta.color) {
-		debugger;
-	}
 	// Add a new key to be ref's sibling if doesn't exist
-	meta = deepExtendContext(meta, (val, key, ctx) =>
-		key === 'ref' && !Array.isArray(ctx) && !ctx.type ?
-			{ type: Schema.Types.ObjectId } :
-			(Array.isArray(ctx) ? [] : {})
-	);
-	if (meta.color) {
-		debugger;
-	}
+	meta = deepExtendContext(meta, (val, key, ctx) => {
+		if (key === 'ref' && !Array.isArray(ctx) && !ctx.type) {
+			return { type: Schema.Types.ObjectId };
+		}
+
+		return Array.isArray(ctx) ? [] : {};
+	});
 
 	if (meta.subdoc || (Array.isArray(meta) && meta.length >= 1 && meta[0].subdoc)) {
 		/************************************************
@@ -95,19 +91,17 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 		let rawMeta = clone(meta);
 		delete meta.subdoc;
 
-		debugger;
 		meta = deepMapValues(meta, (val, key, ctx) => {
 			if (key === 'ref') {
 				if (!isTypedModel(val)) throw new Error(`Referenced type for ${ propertyKey } is not a subclass of 'TypedModel.'`);
+				// TODO: ref is a reserved keyword.
 				return val.name;
 			}
 			return val;
 		});
-		debugger;
 
 		let childSchema = new Schema(meta, isBoolean ? undefined : schemaOptions);
 
-		debugger;
 		propRawMeta[propertyKey] = isSingleNested ? meta : [meta];
 		propsMeta[propertyKey] = isSingleNested ? childSchema : [childSchema];
 	} else {
@@ -200,17 +194,15 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 		let rawMeta = clone(meta);
 		meta = deepMapValues(meta, (val, key, ctx) => {
 			if (key === 'ref') {
-				debugger;
-				return isTypedModel(val) && val.name ?
-					val.name :
-					(Array.isArray(val) && val.length === 1 && isTypedModel(val[0]) && val[0].name ?
-						val[0].name :
-						val);
+				if (Array.isArray(val) && val.length === 1 && isTypedModel(val[0]) && val[0].name) {
+					return val[0].name;
+				} else if (isTypedModel(val) && val.name) {
+					return val.name;
+				}
 			}
-			else return val;
-		});
 
-		debugger;
+			return val;
+		});
 
 		propRawMeta[propertyKey] = rawMeta;
 		propsMeta[propertyKey] = meta;

@@ -17,13 +17,13 @@ export interface ICar {
 export interface IRoom {
 	color: IColor;
 	name: string;
+	owner?: User;
 }
 
 export interface IHouse {
 	name: string;
 	car: ICar;
 	rooms: IRoom[];
-	owner?: User;
 }
 
 @model
