@@ -209,6 +209,16 @@ const house: House = await House.findOne({ name: 'home' }).populate('rooms.owner
 const house: House = await House.findOne({ name: 'home' }).populate('car.users').exec() as House;
 ```
 
+### Middlewares (pre & post hooks)
+```typescript
+@method({
+	pre: ['save'],
+	post: ['remove']
+})
+public preSavePostRemove() {
+}
+```
+
 ### Validations
 ```typescript
 @model
@@ -265,6 +275,15 @@ export class ValidateTest extends TypedModel {
 	public static validateEmail4(value, object, callback) {
 		// Object is mapped to object
 		// Support mongoose isAsync callback
+		let result = ValidateTest.EMAIL_REGEX.test(value);
+		callback(result, 'Overwriting error');
+	}
+
+	@method<ValidateTest>({
+		validate: ['email2', 'email3'],
+		message: 'Validating for both email2 and email3'
+	})
+	public validateEmail2AndEmail3(value, callback) {
 		let result = ValidateTest.EMAIL_REGEX.test(value);
 		callback(result, 'Overwriting error');
 	}
