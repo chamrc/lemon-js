@@ -277,4 +277,4 @@ Licensed under MIT.
 
 ## Credits
 
-Based on the work of @chamrc/lemon-js
+Based on the work of @megahertz/mongoose-model
