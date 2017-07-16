@@ -21,7 +21,7 @@ export interface IRoom {
 
 export interface IHouse {
 	name: string;
-	cars: ICar;
+	car: ICar;
 	rooms: IRoom[];
 	owner?: User;
 }
@@ -30,7 +30,7 @@ export interface IHouse {
 export class House extends TypedModel implements IHouse {
 	@property name: string;
 	@property({
-		child: true,
+		subdoc: true,
 		make: String,
 		model: String,
 		color: {
@@ -40,16 +40,16 @@ export class House extends TypedModel implements IHouse {
 		},
 		users: [{ ref: User }]
 	})
-	cars: ICar;
-	@property({
-		children: true,
+	car: ICar;
+	@property([{
+		subdoc: true,
 		name: String,
 		color: {
 			r: Number,
 			g: Number,
 			b: Number
 		},
-		owner: { ref: User }
-	})
+		owner: { refer: User }
+	}])
 	rooms: IRoom[];
 }

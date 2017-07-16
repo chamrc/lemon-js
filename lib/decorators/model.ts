@@ -21,13 +21,14 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 	const cls = constructor as any;
 	const name: string = cls.name;
 	let properties = cls._meta.properties as SchemaTypeOptions<any>;
+	let rawProperties = cls._meta.rawProperties as SchemaTypeOptions<any>;
 
 	if (options) {
 		cls._meta.schemaOptions = options;
 	}
 
 	properties = Object.keys(properties).reduce((result, key) => {
-		result[key] = initProp(key, properties[key], constructor);
+		result[key] = initProp(key, properties[key], rawProperties[key], constructor);
 		return result;
 	}, {});
 
@@ -36,7 +37,7 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
 
-function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: typeof TypedModel) {
+function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: SchemaTypeOptions<T>, constructor: typeof TypedModel) {
 	Object.defineProperty(constructor.prototype, name, {
 		configurable: true,
 		enumerable: true,
@@ -44,8 +45,10 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 			const doc = this._document;
 			const value = doc ? doc[name] : undefined;
 			// TODO: support subdoc
+			// debugger;
 
-			if (value && (options.refer || options.ref)) {
+			if (value && rawOptions.ref) {
+				debugger;
 				let ValueType = options.ref ? options.ref : options.refer;
 				if (Array.isArray(value)) {
 					return value.map(r => new ValueType(r));
@@ -65,10 +68,16 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, constructor: t
 		},
 	});
 
-	const result = deepMapValues(options, (val, key, ctx) => {
-		if (key === 'ref') return val._meta && val.name ? val.name : val;
-		else return val;
-	});
+	// if (options.ref) {
+	// 	debugger;
+	// }
+	// const result = deepMapValues(options, (val, key, ctx) => {
+	// 	if (key === 'ref') return val._meta && val.name ? val.name : val;
+	// 	else return val;
+	// });
+	// if (options.ref) {
+	// 	debugger;
+	// }
 
-	return result;
+	return options;
 }
