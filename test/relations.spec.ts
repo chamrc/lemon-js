@@ -44,12 +44,11 @@ describe('Model relations', () => {
 
 	it('should allow to populate array of related models', async () => {
 		const user = await User.findByEmail('user1@example.com').populate('permissions').exec();
-
 		expect(user.name).to.be.equal('User 1');
 		expect(user.permissions.length).to.be.equal(2);
 		expect(user.permissions[0].name).to.be.equal('read');
-		expect(user.permissions[0].document).to.be.not.null;
+		expect(user.permissions[0].document).to.be.not.undefined;
 		expect(user.permissions[1].name).to.be.equal('write');
-		expect(user.permissions[1].document).to.be.not.null;
+		expect(user.permissions[1].document).to.be.not.undefined;
 	});
 });

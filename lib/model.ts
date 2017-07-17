@@ -38,6 +38,7 @@ export class TypedModel {
 
 		const Model = (this.constructor as any)._model;
 		this._document = new Model(document);
+		this._document['_typedObject'] = this;
 	}
 
 	public get document(): Document {

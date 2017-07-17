@@ -1,5 +1,7 @@
 import { TypedModel } from '..';
 
+export type DeepCallback = (value: any, key: string | number, context: any, path?: string) => any;
+
 /************************************************
  *
  * Map context
@@ -7,6 +9,8 @@ import { TypedModel } from '..';
  ************************************************/
 
 function extendContext(obj, deepMapper) {
+	if (!isObject(obj)) return obj;
+
 	let subCtx = Object.keys(obj).reduce((res, key) => {
 		let orig = {};
 		orig[key] = obj[key];
@@ -17,18 +21,22 @@ function extendContext(obj, deepMapper) {
 	return subCtx;
 }
 
-export function deepExtendContext(obj, fn, objCtx?, objKey?) {
-	const deepMapper = (val, key, ctx) => typeof val === 'object' ? deepExtendContext(val, fn, ctx, key) : fn(val, key, ctx);
+export function deepExtendContext(obj, fn: DeepCallback, objCtx?, objKey?, path = '') {
+	if (!isObject(obj)) return obj;
+
+	let deepMapper = (val, key, ctx) => typeof val === 'object' ?
+		deepExtendContext(val, fn, ctx, key) : fn(val, key, ctx, joinPath(path, key, ctx));
+	deepMapper = deepMapper.bind(this);
 
 	let result, subCtx;
 	if (Array.isArray(obj)) {
 		result = obj.map(deepMapper).reduce((acc, val) => acc.concat(val), []);
 		deepExtend(obj, result);
-		subCtx = fn(obj, objKey, objCtx);
+		subCtx = fn(obj, objKey, objCtx, path);
 	} else if (typeof obj === 'object') {
 		result = extendContext(obj, deepMapper);
 		deepExtend(obj, result);
-		subCtx = fn(obj, objKey, objCtx);
+		subCtx = fn(obj, objKey, objCtx, path);
 	}
 
 	if (!objKey) return obj;
@@ -42,6 +50,8 @@ export function deepExtendContext(obj, fn, objCtx?, objKey?) {
  ************************************************/
 
 function mapValues(obj, deepMapper) {
+	if (!isObject(obj)) return obj;
+
 	return Object.keys(obj).reduce(
 		(res, key) => {
 			res[key] = deepMapper(obj[key], key, obj);
@@ -50,15 +60,19 @@ function mapValues(obj, deepMapper) {
 	);
 }
 
-export function deepMapValues(obj, fn) {
-	const deepMapper = (val, key, ctx) => {
+export function deepMapValues(obj, fn: DeepCallback, path = '') {
+	if (!isObject(obj)) return obj;
+
+	let deepMapper = (val, key, ctx) => {
+		let subPath = joinPath(path, key, ctx);
 		if (typeof val === 'object') {
-			ctx[key] = deepMapValues(val, fn);
-			return fn(ctx[key], key, ctx);
+			ctx[key] = deepMapValues(val, fn, subPath);
+			return fn(ctx[key], key, ctx, subPath);
 		} else {
-			return fn(val, key, ctx);
+			return fn(val, key, ctx, subPath);
 		}
 	};
+	deepMapper = deepMapper.bind(this);
 
 	if (Array.isArray(obj)) return obj.map(deepMapper);
 	if (typeof obj === 'object') return mapValues(obj, deepMapper);
@@ -71,22 +85,27 @@ export function deepMapValues(obj, fn) {
  *
  ************************************************/
 
-function mapKeys(obj, deepMapper, fn) {
+function mapKeys(obj, deepMapper, fn, path = '') {
+	if (!isObject(obj)) return obj;
+
 	return Object.keys(obj).reduce(
 		(res, key) => {
-			let newKey = fn(obj[key], key, obj);
+			let newKey = fn(obj[key], key, obj, joinPath(path, key, obj));
 			res[newKey ? newKey : key] = deepMapper(obj[key], key, obj);
 			return res;
 		}, {}
 	);
 }
 
-export function deepMapKeys(obj, fn) {
+export function deepMapKeys(obj, fn: DeepCallback, path = '') {
 	if (!isObject(obj)) return obj;
-	const deepMapper = (val, key, ctx) => (typeof val === 'object') ? deepMapKeys(val, fn) : val;
+
+	let deepMapper = (val, key, ctx) => (typeof val === 'object') ?
+		deepMapKeys(val, fn, joinPath(path, key, ctx)) : val;
+	deepMapper = deepMapper.bind(this);
 
 	if (Array.isArray(obj)) return obj.map(deepMapper);
-	else if (isObject(obj)) return mapKeys(obj, deepMapper, fn);
+	else if (isObject(obj)) return mapKeys(obj, deepMapper, fn, path);
 	return obj;
 }
 
@@ -95,6 +114,14 @@ export function deepMapKeys(obj, fn) {
  * Helpers
  *
  ************************************************/
+
+function joinPath(path: string, key: string | number, ctx: any) {
+	let nextPath = Array.isArray(ctx) ? `[${ key }]` : `${ key }`;
+	let delimiter = Array.isArray(ctx) ? '' : '.';
+
+	if (path && path.length > 0) return [path, nextPath].join(delimiter);
+	else return nextPath;
+}
 
 export function objectFromData(key, value) {
 	let result = {};
@@ -114,7 +141,7 @@ function isObject(value) {
 }
 
 export function isTypedModel(obj: any) {
-	return obj && (obj._meta || obj._model || obj._schema);
+	return Boolean(obj && (obj._meta || obj._model || obj._schema));
 }
 
 /************************************************
@@ -136,9 +163,9 @@ export function getPath(obj, path) {
 		let keys = part.match(/\[(.*?)\]/);
 		if (keys) {
 			let key = part.replace(keys[0], '');
-			return o[key][keys[1]];
+			return o && o[key] && o[key][keys[1]] ? o[key][keys[1]] : undefined;
 		}
-		return o[part];
+		return o && o[part] ? o[part] : undefined;
 	}, obj);
 }
 

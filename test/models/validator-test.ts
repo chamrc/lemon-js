@@ -33,6 +33,8 @@ export class ValidateTest extends TypedModel {
 	})
 	public email4: string;
 
+	@property public email5: string;
+
 	public static validateEmail1(value) {
 		return ValidateTest.EMAIL_REGEX.test(value);
 	}
@@ -67,6 +69,8 @@ export class ValidateTest extends TypedModel {
 		pre: ['save'],
 		post: ['remove']
 	})
-	public preSave() {
+	public preSave(next) {
+		this.email5 = '123@321.com';
+		next();
 	}
 }

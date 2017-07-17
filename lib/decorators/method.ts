@@ -80,14 +80,18 @@ function saveMethodSignature<T>(target: T, methodKey: string, descriptor: Proper
 }
 
 export function wrapMiddleware(fn: Function, constructor) {
+
 	let isAsync = fn.length === 2;
+
 	if (isAsync) {
 		return function (next, done) {
-			fn.bind(new constructor(this))(next, done);
+			let context = this['_typedObject'] ? this['_typedObject'] : this;
+			return fn.bind(context)(next, done);
 		};
 	} else {
 		return function (next) {
-			return fn.bind(new constructor(this))(next);
+			let context = this['_typedObject'] ? this['_typedObject'] : this;
+			return fn.bind(context)(next);
 		};
 	}
 }

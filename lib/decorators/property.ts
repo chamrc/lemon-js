@@ -214,13 +214,16 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 
 export function wrapValidator(validator, constructor) {
 	let isAsync = validator.length === 2;
+
 	if (isAsync) {
 		return function (value, callback) {
-			return validator.bind(new constructor(this))(value, callback);
+			let context = this['_typedObject'] ? this['_typedObject'] : this;
+			return validator.bind(context)(value, callback);
 		};
 	} else {
 		return function (value) {
-			return validator.bind(new constructor(this))(value);
+			let context = this['_typedObject'] ? this['_typedObject'] : this;
+			return validator.bind(context)(value);
 		};
 	}
 }

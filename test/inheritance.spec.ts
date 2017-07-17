@@ -76,12 +76,12 @@ describe('Model inheritance:', () => {
 		it('should find an existed user', async () => {
 			const user = await TypedUser.findByEmail<TypedUser>(email1);
 			expect(user.name).to.be.equal('User 1');
-			expect(user.type).to.be.not.null;
+			expect(user.type).to.be.not.undefined;
 			expect(user.type).to.be.equal('admin');
 
 			const user2 = await TypedUser.findByEmail<TypedUser>(email2);
 			expect(user2.name).to.be.equal('User 2');
-			expect(user2.type).to.be.not.null;
+			expect(user2.type).to.be.not.undefined;
 			expect(user2.type).to.be.equal('user');
 		});
 	});

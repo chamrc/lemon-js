@@ -82,18 +82,18 @@ describe('Model:', () => {
 	describe('Accessors:', () => {
 		it('public get document()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user.document).to.be.not.null;
+			expect(user.document).to.be.not.undefined;
 		});
 
 		it('public get _id()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user._id).to.be.not.null;
+			expect(user._id).to.be.not.undefined;
 		});
 
 		it('public set _id()', async () => {
 			const user = await User.findByEmail(email1);
 			const oldId = user._id;
-			expect(user._id).to.be.not.null;
+			expect(user._id).to.be.not.undefined;
 			const newId = new Types.ObjectId('51bb793aca2ab77a3200000d');
 			user._id = newId;
 			expect(user._id).to.be.not.equal(oldId);
@@ -101,20 +101,20 @@ describe('Model:', () => {
 
 		it('public get __v()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user.__v).to.be.not.null;
+			expect(user.__v).to.be.not.undefined;
 		});
 
 		it('public set __v()', async () => {
 			const user = await User.findByEmail(email1);
 			const oldV = user.__v;
-			expect(user.__v).to.be.not.null;
+			expect(user.__v).to.be.not.undefined;
 			user.__v = 22312312;
 			expect(user.__v).to.be.not.equal(oldV);
 		});
 
 		it('public get id()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user.id).to.be.not.null;
+			expect(user.id).to.be.not.undefined;
 		});
 
 		it('public get isNew()', async () => {
@@ -124,7 +124,7 @@ describe('Model:', () => {
 
 		it('public get createdAt()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user.createdAt).to.be.not.null;
+			expect(user.createdAt).to.be.not.undefined;
 		});
 
 		it('public set createdAt()', async () => {
@@ -136,7 +136,7 @@ describe('Model:', () => {
 
 		it('public get updatedAt()', async () => {
 			const user = await User.findByEmail(email1);
-			expect(user.updatedAt).to.be.not.null;
+			expect(user.updatedAt).to.be.not.undefined;
 		});
 
 		it('public set updatedAt()', async () => {
@@ -149,16 +149,16 @@ describe('Model:', () => {
 
 	describe('Static methods:', () => {
 		it('public static getModel()', async () => {
-			expect(User.getModel()).to.be.not.null;
+			expect(User.getModel()).to.be.not.undefined;
 		});
 
 		it('public static getSchema()', async () => {
-			expect(User.getSchema()).to.be.not.null;
+			expect(User.getSchema()).to.be.not.undefined;
 		});
 
 		it('public static remove()', async () => {
 			let user = await User.findByEmail(email1);
-			expect(user.isNew).to.be.not.null;
+			expect(user.isNew).to.be.not.undefined;
 			User.remove();
 			user = await User.findByEmail(email1);
 			expect(user.isNew).to.be.false;
