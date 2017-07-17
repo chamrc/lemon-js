@@ -1,7 +1,8 @@
 import { model as mongooseModel, Schema } from 'mongoose';
+import * as TimestampPlugin from 'mongoose-timestamp';
 import * as pluralize from 'pluralize';
 import { MethodSignature, SchemaTypeOptions } from '.';
-import { deepMapKeys, deepMapValues, isTypedModel, TypedModel } from '..';
+import { deepExtend, deepMapKeys, deepMapValues, isTypedModel, TypedModel } from '..';
 
 export function model(constructor: typeof TypedModel);
 export function model(options: object);
@@ -23,17 +24,19 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 	let properties = cls._meta.properties as SchemaTypeOptions<any>;
 	let rawProperties = cls._meta.rawProperties as SchemaTypeOptions<any>;
 
-	if (options) {
-		cls._meta.schemaOptions = options;
-	}
-
+	// Initialize all properties;
 	properties = Object.keys(properties).reduce((result, key) => {
 		result[key] = initProp(key, properties[key], rawProperties[key], constructor);
 		return result;
 	}, {});
 
+	if (options) {
+		cls._meta.schemaOptions = options;
+	}
 
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
+	cls._schema.plugin(TimestampPlugin);
+
 	if (cls._schema && cls._sign) {
 		(cls._sign as [MethodSignature]).forEach(methodSign => {
 			/************************************************

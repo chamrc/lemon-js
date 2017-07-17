@@ -188,7 +188,7 @@ function deepCloneArray(arr) {
 	return cloned;
 }
 
-function deepExtend(...params: any[]) {
+export function deepExtend(...params: any[]) {
 	if (arguments.length < 1 || typeof arguments[0] !== 'object') {
 		return false;
 	}

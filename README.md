@@ -24,7 +24,6 @@ export class Permission extends TypedModel {
 @model
 export class User extends TypedModel {
 	@property public age: number;
-	@property public createdAt: Date;
 	@property({ index: true }) public email: string;
 	// Use either ref or refer.
 	@property([{ refer: Permission }]) public permissions: [Permission];
@@ -293,6 +292,17 @@ export class ValidateTest extends TypedModel {
 		callback(result, 'Overwriting error');
 	}
 }
+```
+
+### createdAt & updatedAt
+```typescript
+let user = await User.findOne({});
+
+// Created date
+let creationDate = user.createdAt;
+
+// Updated date
+let updateDate = user.updatedAt;
 ```
 
 ## License

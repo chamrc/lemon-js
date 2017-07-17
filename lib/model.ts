@@ -28,7 +28,6 @@ export class TypedModel {
 	protected static _model: MongooseModel<Document>;
 	protected static _meta: IMeta;
 	protected static _schema: Schema;
-
 	protected _document: Document;
 
 	constructor(document?: any) {
@@ -67,6 +66,38 @@ export class TypedModel {
 
 	public get isNew(): boolean {
 		return this._document.isNew;
+	}
+
+	// public get createdDate(): Date {
+	// 	return (this._document as any).createdDate;
+	// }
+
+	// public set createdDate(createdDate: Date) {
+	// 	(this._document as any).createdDate = createdDate;
+	// }
+
+	// public get updatedDate(): Date {
+	// 	return (this._document as any).updatedDate;
+	// }
+
+	// public set updatedDate(updatedDate: Date) {
+	// 	(this._document as any).updatedDate = updatedDate;
+	// }
+
+	public get createdAt(): Date {
+		return (this._document as any).createdAt;
+	}
+
+	public set createdAt(createdAt: Date) {
+		(this._document as any).createdAt = createdAt;
+	}
+
+	public get updatedAt(): Date {
+		return (this._document as any).updatedAt;
+	}
+
+	public set updatedAt(updatedAt: Date) {
+		(this._document as any).updatedAt = updatedAt;
 	}
 
 	/************************************************

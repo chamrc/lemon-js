@@ -121,6 +121,30 @@ describe('Model:', () => {
 			const user = await User.findByEmail(email1);
 			expect(user.isNew).to.be.false;
 		});
+
+		it('public get createdAt()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.createdAt).to.be.not.null;
+		});
+
+		it('public set createdAt()', async () => {
+			const user = await User.findByEmail(email1);
+			const oldCreatedAt = user.createdAt;
+			user.createdAt = new Date();
+			expect(user.createdAt).to.be.not.equal(oldCreatedAt);
+		});
+
+		it('public get updatedAt()', async () => {
+			const user = await User.findByEmail(email1);
+			expect(user.updatedAt).to.be.not.null;
+		});
+
+		it('public set updatedAt()', async () => {
+			const user = await User.findByEmail(email1);
+			const oldUpdatedAt = user.updatedAt;
+			user.updatedAt = new Date();
+			expect(user.updatedAt).to.be.not.equal(oldUpdatedAt);
+		});
 	});
 
 	describe('Static methods:', () => {
@@ -187,7 +211,7 @@ describe('Model:', () => {
 			expect(users[0].name).to.be.equal('User 2');
 		});
 
-		it('public static findOneAndUpdate()', async () => {
+		it('public static findOneAndUpAt()', async () => {
 			const newEmail = '123@321.com';
 			const user = await User.findOneAndUpdate<User>({ email: email1 }, { email: newEmail }, { new: true }).exec();
 			expect(user).to.not.be.null;
@@ -199,7 +223,7 @@ describe('Model:', () => {
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
-		it('public static findByIdAndUpdate()', async () => {
+		it('public static findByIdAndUpAt()', async () => {
 			const refUser = await User.findOne<User>({ email: email1 }).limit(1);
 			expect(refUser).to.not.be.null;
 			expect(refUser._id).to.not.be.null;
@@ -301,16 +325,14 @@ describe('Model:', () => {
 			expect(users[1].name).to.be.equal('User 2');
 		});
 
-		it('public static update()', async () => {
+		it('public static upAt()', async () => {
 			let users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
 			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
 			expect(users[0].isActive).to.be.false;
 			expect(users[1].name).to.be.equal('User 2');
 			expect(users[1].isActive).to.be.false;
-
 			await User.update({ email: email1 }, { isActive: true });
-
 			users = await User.find<User[]>({});
 			expect(users.length).to.be.equal(2);
 			expect(users[0].displayName).to.be.equal(`User 1 <${ email1 }>`);
@@ -524,7 +546,7 @@ describe('Model:', () => {
 
 		});
 
-		it.skip('public invalidate()', async () => {
+		it.skip('public invaliAt()', async () => {
 
 		});
 
@@ -576,7 +598,7 @@ describe('Model:', () => {
 
 		});
 
-		it.skip('public validate()', async () => {
+		it.skip('public valiAt()', async () => {
 
 		});
 
@@ -596,7 +618,7 @@ describe('Model:', () => {
 
 		});
 
-		it.skip('public async update()', async () => {
+		it.skip('public async upAt()', async () => {
 
 		});
 

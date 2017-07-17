@@ -59,9 +59,9 @@
 		"zone.js": "^0.8.13"
 	},
 	"dependencies": {
-		"mongoose": "^4.11.3",
 		"@types/mongodb": "^2.2.7",
 		"@types/mongoose": "^4.7.18",
+		"mongoose": "^4.11.3",
 		"pluralize": "^5.0.0",
 		"q": "^1.5.0"
 	}
