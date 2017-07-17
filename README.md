@@ -51,6 +51,11 @@ export class Post extends TypedModel {
 		return this.findOne({ title });
 	}
 }
+
+@model
+export class TypedUser extends User {
+	@property({ default: 'user' }) public type: string;
+}
 ```
 
 ### Insert objects

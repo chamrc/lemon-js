@@ -14,7 +14,12 @@ export class User extends TypedModel {
 		return `${ this.name } <${ this.email }>`;
 	}
 
-	public static findByEmail(email: string): Query<User> {
+	public static findByEmail<T extends User>(email: string): Query<T> {
 		return this.findOne({ email });
 	}
+}
+
+@model
+export class TypedUser extends User {
+	@property({ default: 'user' }) public type: string;
 }
