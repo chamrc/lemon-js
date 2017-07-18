@@ -54,7 +54,7 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 					propConfig.validators.push({
 						type: 'user defined',
 						message: methodSign.validate.message,
-						// isAsync: methodSign.validate.validator.length === 2,
+						isAsync: methodSign.validate.validator.length === 2,
 						validator: methodSign.validate.validator
 					});
 				}
