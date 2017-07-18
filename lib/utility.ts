@@ -8,7 +8,12 @@ export type DeepCallback = (value: any, key: string | number, context: any, path
  *
  ************************************************/
 
-function extendContext(obj, deepMapper) {
+export function deepExtendContext(obj, fn: DeepCallback, topDown = true) {
+	if (topDown) return deepExtendContextTopDown(obj, fn);
+	return deepExtendContextBottomUp(obj, fn);
+}
+
+function extendContextTopDown(obj, deepMapper) {
 	if (!isObject(obj)) return obj;
 
 	let subCtx = Object.keys(obj).reduce((res, key) => {
@@ -21,11 +26,53 @@ function extendContext(obj, deepMapper) {
 	return subCtx;
 }
 
-export function deepExtendContext(obj, fn: DeepCallback, objCtx?, objKey?, path = '') {
+function deepExtendContextTopDown(obj, fn: DeepCallback, objCtx?, objKey?, path = '') {
 	if (!isObject(obj)) return obj;
 
 	let deepMapper = (val, key, ctx) => typeof val === 'object' ?
-		deepExtendContext(val, fn, ctx, key) : fn(val, key, ctx, joinPath(path, key, ctx));
+		deepExtendContextTopDown(val, fn, ctx, key) : fn(val, key, ctx, joinPath(path, key, ctx));
+	deepMapper = deepMapper.bind(this);
+
+	let result, subresults, subCtx;
+	if (Array.isArray(obj)) {
+		// Run this
+		result = fn(obj, objKey, objCtx, path);
+		// Run subtree
+		subresults = obj.map(deepMapper).reduce((acc, val) => acc.concat(val), []);
+		deepExtend(obj, subresults);
+		subCtx = [result].concat([obj]);
+	} else if (typeof obj === 'object') {
+		// Run this
+		result = fn(obj, objKey, objCtx, path);
+		// Run subtree
+		subresults = extendContextTopDown(obj, deepMapper);
+		deepExtend(obj, subresults);
+		subCtx = deepExtend(result, objectFromData(objKey, obj));
+	}
+
+	if (!objKey) return obj;
+	else return subCtx;
+}
+
+
+function extendContextBottomUp(obj, deepMapper) {
+	if (!isObject(obj)) return obj;
+
+	let subCtx = Object.keys(obj).reduce((res, key) => {
+		let orig = {};
+		orig[key] = obj[key];
+		let result = deepMapper(obj[key], key, obj);
+		deepExtend(res, orig, result);
+		return res;
+	}, {});
+	return subCtx;
+}
+
+function deepExtendContextBottomUp(obj, fn: DeepCallback, objCtx?, objKey?, path = '') {
+	if (!isObject(obj)) return obj;
+
+	let deepMapper = (val, key, ctx) => typeof val === 'object' ?
+		deepExtendContextBottomUp(val, fn, ctx, key) : fn(val, key, ctx, joinPath(path, key, ctx));
 	deepMapper = deepMapper.bind(this);
 
 	let result, subCtx;
@@ -34,7 +81,7 @@ export function deepExtendContext(obj, fn: DeepCallback, objCtx?, objKey?, path 
 		deepExtend(obj, result);
 		subCtx = fn(obj, objKey, objCtx, path);
 	} else if (typeof obj === 'object') {
-		result = extendContext(obj, deepMapper);
+		result = extendContextBottomUp(obj, deepMapper);
 		deepExtend(obj, result);
 		subCtx = fn(obj, objKey, objCtx, path);
 	}
@@ -49,7 +96,12 @@ export function deepExtendContext(obj, fn: DeepCallback, objCtx?, objKey?, path 
  *
  ************************************************/
 
-function mapValues(obj, deepMapper) {
+export function deepMapValues(obj, fn: DeepCallback, topDown = true) {
+	if (topDown) return deepMapValuesTopDown(obj, fn);
+	return deepMapValuesBottomUp(obj, fn);
+}
+
+function mapValuesTopDown(obj, deepMapper) {
 	if (!isObject(obj)) return obj;
 
 	return Object.keys(obj).reduce(
@@ -60,13 +112,44 @@ function mapValues(obj, deepMapper) {
 	);
 }
 
-export function deepMapValues(obj, fn: DeepCallback, path = '') {
+function deepMapValuesTopDown(obj, fn: DeepCallback, path = '') {
 	if (!isObject(obj)) return obj;
 
 	let deepMapper = (val, key, ctx) => {
 		let subPath = joinPath(path, key, ctx);
 		if (typeof val === 'object') {
-			ctx[key] = deepMapValues(val, fn, subPath);
+			let result = fn(ctx[key], key, ctx, subPath);
+			let subresults = deepMapValuesTopDown(val, fn, subPath);
+			return deepExtend(result, subresults);
+		} else {
+			return fn(val, key, ctx, subPath);
+		}
+	};
+	deepMapper = deepMapper.bind(this);
+
+	if (Array.isArray(obj)) return obj.map(deepMapper);
+	if (typeof obj === 'object') return mapValuesTopDown(obj, deepMapper);
+	return obj;
+}
+
+function mapValuesBottomUp(obj, deepMapper) {
+	if (!isObject(obj)) return obj;
+
+	return Object.keys(obj).reduce(
+		(res, key) => {
+			res[key] = deepMapper(obj[key], key, obj);
+			return res;
+		}, {}
+	);
+}
+
+function deepMapValuesBottomUp(obj, fn: DeepCallback, path = '') {
+	if (!isObject(obj)) return obj;
+
+	let deepMapper = (val, key, ctx) => {
+		let subPath = joinPath(path, key, ctx);
+		if (typeof val === 'object') {
+			ctx[key] = deepMapValuesBottomUp(val, fn, subPath);
 			return fn(ctx[key], key, ctx, subPath);
 		} else {
 			return fn(val, key, ctx, subPath);
@@ -75,7 +158,7 @@ export function deepMapValues(obj, fn: DeepCallback, path = '') {
 	deepMapper = deepMapper.bind(this);
 
 	if (Array.isArray(obj)) return obj.map(deepMapper);
-	if (typeof obj === 'object') return mapValues(obj, deepMapper);
+	if (typeof obj === 'object') return mapValuesBottomUp(obj, deepMapper);
 	return obj;
 }
 
@@ -85,7 +168,12 @@ export function deepMapValues(obj, fn: DeepCallback, path = '') {
  *
  ************************************************/
 
-function mapKeys(obj, deepMapper, fn, path = '') {
+export function deepMapKeys(obj, fn: DeepCallback, topDown = true) {
+	if (topDown) return deepMapKeysTopDown(obj, fn);
+	return deepMapKeysBottomUp(obj, fn);
+}
+
+function mapKeysTopDown(obj, deepMapper, fn, path = '') {
 	if (!isObject(obj)) return obj;
 
 	return Object.keys(obj).reduce(
@@ -97,16 +185,57 @@ function mapKeys(obj, deepMapper, fn, path = '') {
 	);
 }
 
-export function deepMapKeys(obj, fn: DeepCallback, path = '') {
+function deepMapKeysTopDown(obj, fn: DeepCallback, path = '') {
 	if (!isObject(obj)) return obj;
 
 	let deepMapper = (val, key, ctx) => (typeof val === 'object') ?
-		deepMapKeys(val, fn, joinPath(path, key, ctx)) : val;
+		deepMapKeysTopDown(val, fn, joinPath(path, key, ctx)) : val;
 	deepMapper = deepMapper.bind(this);
 
 	if (Array.isArray(obj)) return obj.map(deepMapper);
-	else if (isObject(obj)) return mapKeys(obj, deepMapper, fn, path);
+	else if (isObject(obj)) return mapKeysTopDown(obj, deepMapper, fn, path);
 	return obj;
+}
+
+function mapKeysBottomUp(obj, deepMapper, fn, path = '') {
+	if (!isObject(obj)) return obj;
+
+	return Object.keys(obj).reduce(
+		(res, key) => {
+			let result = deepMapper(obj[key], key, obj);
+			let newKey = fn(obj[key], key, obj, joinPath(path, key, obj));
+			res[newKey ? newKey : key] = result;
+			return res;
+		}, {}
+	);
+}
+
+function deepMapKeysBottomUp(obj, fn: DeepCallback, path = '') {
+	if (!isObject(obj)) return obj;
+
+	let deepMapper = (val, key, ctx) => (typeof val === 'object') ?
+		deepMapKeysBottomUp(val, fn, joinPath(path, key, ctx)) : val;
+	deepMapper = deepMapper.bind(this);
+
+	if (Array.isArray(obj)) return obj.map(deepMapper);
+	else if (isObject(obj)) return mapKeysBottomUp(obj, deepMapper, fn, path);
+	return obj;
+}
+
+/************************************************
+ *
+ * Deep traverse
+ *
+ ************************************************/
+
+export function deepTraverse(obj, fn: DeepCallback, topDown = true) {
+	// Don't change keys
+	let newFn: DeepCallback = (val, key, ctx, path) => {
+		fn(val, key, ctx, path);
+	};
+
+	if (topDown) return deepMapKeysTopDown(obj, newFn);
+	return deepMapKeysBottomUp(obj, newFn);
 }
 
 /************************************************

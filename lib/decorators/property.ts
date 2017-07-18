@@ -82,14 +82,13 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
 		rawMetadata: undefined
 	};
 
-	if (isSubDocumentMetadata(metadatas)) {
+	if (isSubDocumentMetadata(meta)) {
 		// Sub-documents / Subdocs
 		metadatas = processSubDocumentMetadata(target, propertyKey, metadatas);
 	} else {
 		// Validators
 		metadatas = processValidators(target, propertyKey, metadatas);
-
-		// Types
+		// Save references to TypedModel constructors
 		metadatas = processTypedModelsReferences(target, propertyKey, metadatas);
 	}
 
@@ -103,41 +102,47 @@ function savePropertyMeta(target: TypedModel, propertyKey: string, meta: any = {
  *
  ************************************************/
 
-function isSubDocumentMetadata(metadatas: MetadataParameter) {
-	let meta = metadatas.metadata;
+function processSubDocumentMetadata(target, propertyKey: string, metadatas: MetadataParameter): MetadataParameter {
+	return processSubDocument(metadatas.metadata, propertyKey);
+}
+
+function isSubDocumentMetadata(meta: any) {
+	if (!meta) return false;
 	return Boolean(meta.subdoc || (Array.isArray(meta) && meta.length >= 1 && meta[0].subdoc));
 }
 
-function processSubDocumentMetadata(target, propertyKey: string, metadatas: MetadataParameter): MetadataParameter {
-	// let constructor = target.constructor as any;
-	let constructor = target.constructor as any,
-		meta = metadatas.metadata,
-		rawMetadata = metadatas.rawMetadata;
+function processSubDocument(meta: any, metaKey: string | number) {
+	let schemaOptions = meta.subdoc;
+	let isBoolean = typeof schemaOptions === 'boolean';
 
 	let isSingleNested = Boolean(meta.subdoc);
 	if (!isSingleNested) {
-		if (meta.length !== 1) throw new Error(`Expecting one element for property definition of ${ propertyKey }.`);
+		if (meta.length !== 1) throw new Error(`Expecting one element for property definition of ${ metaKey }.`);
 		meta = meta[0];
 	}
-	let schemaOptions = meta.subdoc;
-	let isBoolean = typeof schemaOptions === 'boolean';
 
 	// Creates a raw metadata that stores TypedModel constructor instead of Collection Name.
 	let rawMeta = clone(meta);
 	delete meta.subdoc;
 
+	debugger;
 	meta = deepMapValues(meta, (val, key, ctx) => {
-		if (key === 'ref') {
-			if (!isTypedModel(val)) throw new Error(`Referenced type for ${ propertyKey } is not a subclass of 'TypedModel.'`);
+		if (key === 'ref' && isTypedModel(val)) {
 			return val.name;
+		} else if (isSubDocumentMetadata(val)) {
+			let metadatas = processSubDocument(val, key);
+			return metadatas.metadata;
 		}
 		return val;
 	});
+	debugger;
 
 	let childSchema = new Schema(meta, isBoolean ? undefined : schemaOptions);
+	childSchema['_meta'] = meta;
+	childSchema['_rawMeta'] = rawMeta;
 
+	rawMeta = isSingleNested ? rawMeta : [rawMeta];
 	meta = isSingleNested ? childSchema : [childSchema];
-	rawMeta = isSingleNested ? meta : [meta];
 
 	return {
 		metadata: meta,
@@ -145,7 +150,7 @@ function processSubDocumentMetadata(target, propertyKey: string, metadatas: Meta
 	};
 }
 
-export function wrapValidator(validator, constructor) {
+export function wrapValidator(validator) {
 	let isAsync = validator.length === 2;
 
 	if (isAsync) {
@@ -168,8 +173,7 @@ export function wrapValidator(validator, constructor) {
  ************************************************/
 
 function processValidators(target, propertyKey: string, metadatas: MetadataParameter): MetadataParameter {
-	let constructor = target.constructor as any,
-		meta = metadatas.metadata,
+	let meta = metadatas.metadata,
 		rawMeta = metadatas.rawMetadata;
 
 	if (meta.validate) {
@@ -183,7 +187,7 @@ function processValidators(target, propertyKey: string, metadatas: MetadataParam
 				// new Schema({ name: { type: String, validate: custom } });
 				newValidate = {
 					isAsync: meta.validate[0].length === 2,
-					validator: wrapValidator(meta.validate[0], constructor),
+					validator: wrapValidator(meta.validate[0]),
 					message: meta.validate[1]
 				};
 			} else {
@@ -195,7 +199,7 @@ function processValidators(target, propertyKey: string, metadatas: MetadataParam
 				newValidate = meta.validate.map((x) => {
 					return {
 						isAsync: x.validator.length === 2,
-						validator: wrapValidator(x.validator, constructor),
+						validator: wrapValidator(x.validator),
 						message: x.msg ? x.msg : x.message
 					};
 				});
@@ -205,7 +209,7 @@ function processValidators(target, propertyKey: string, metadatas: MetadataParam
 			newValidate = {
 				isAsync: meta.validate.length === 2,
 				message: '',
-				validator: wrapValidator(meta.validate, constructor)
+				validator: wrapValidator(meta.validate)
 			};
 		} else {
 			// new Schema({ name: { type: String, validate: {
@@ -213,7 +217,7 @@ function processValidators(target, propertyKey: string, metadatas: MetadataParam
 			// }}});
 			newValidate = {
 				isAsync: meta.validate.validator.length === 2,
-				validator: wrapValidator(meta.validate.validator, constructor),
+				validator: wrapValidator(meta.validate.validator),
 				message: meta.validate.message
 			};
 		}

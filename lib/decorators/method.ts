@@ -47,12 +47,12 @@ function saveMethodSignature<T>(target: T, methodKey: string, descriptor: Proper
 
 	const signature: MethodSignature = {
 		middlewares: {
-			function: wrapMiddleware(target[methodKey], constructor),
+			function: wrapMiddleware(target[methodKey]),
 			pre: [],
 			post: []
 		},
 		validate: {
-			validator: wrapValidator(target[methodKey], constructor),
+			validator: wrapValidator(target[methodKey]),
 			properties: [],
 			message: ''
 		}
@@ -79,8 +79,7 @@ function saveMethodSignature<T>(target: T, methodKey: string, descriptor: Proper
 	methodMeta.push(signature);
 }
 
-export function wrapMiddleware(fn: Function, constructor) {
-
+export function wrapMiddleware(fn: Function) {
 	let isAsync = fn.length === 2;
 
 	if (isAsync) {

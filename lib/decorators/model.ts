@@ -2,7 +2,7 @@ import { model as mongooseModel, Schema } from 'mongoose';
 import * as TimestampPlugin from 'mongoose-timestamp';
 import * as pluralize from 'pluralize';
 import { MethodSignature, SchemaTypeOptions } from '.';
-import { deepExtend, deepMapKeys, deepMapValues, getPath, isTypedModel, TypedModel } from '..';
+import { deepExtend, deepMapKeys, deepMapValues, deepTraverse, getPath, isTypedModel, TypedModel } from '..';
 
 export function model(constructor: typeof TypedModel);
 export function model(options: object);
@@ -36,6 +36,8 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 
 	cls._schema = new Schema(properties, cls._meta.schemaOptions);
 	cls._schema.plugin(TimestampPlugin);
+	cls._schema['_meta'] = properties;
+	cls._schema['_rawMeta'] = rawProperties;
 
 	if (cls._schema && cls._sign) {
 		(cls._sign as [MethodSignature]).forEach(methodSign => {
@@ -80,11 +82,38 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 }
 
 function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: SchemaTypeOptions<T>, constructor: typeof TypedModel) {
+	createAccessors<T>(name, options, rawOptions, constructor);
+
+	return options;
+}
+
+function isSubdocument(value) {
+	return Boolean(value._doc && value.constructor && value.constructor.name &&
+		(value.constructor.name === 'SingleNested' || value.constructor.name === 'EmbeddedDocument'));
+}
+
+function addAccessor(val) {
+	if (val._travesed) return;
+
+	let schema = val.schema;
+	let meta = schema._meta ? schema._meta : undefined;
+	let rawMeta = schema._rawMeta ? schema._rawMeta : undefined;
+
+	if (meta && rawMeta && !Array.isArray(meta)) {
+		Object.keys(meta).forEach((key, idx, arr) => {
+			createAccessors(key, meta[key], rawMeta[key], val.constructor);
+		});
+
+		val._travesed = true;
+	}
+}
+
+function createAccessors<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: SchemaTypeOptions<T>, constructor) {
 	Object.defineProperty(constructor.prototype, name, {
 		configurable: true,
 		enumerable: true,
 		get() {
-			const doc = this._document;
+			const doc = this._document || this._doc;
 			let value = doc ? doc[name] : undefined;
 
 			// Find TypedModel constructor in result.
@@ -95,43 +124,39 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: Sc
 				SavedTypedModel = rawOptions[0].ref;
 			}
 
-			// Sub-document support
-			if (!value._travesed && value._doc && value.constructor && value.constructor.name && value.constructor.name === 'SingleNested') {
-				value._doc = deepMapValues.bind(this)(value._doc, (val, key, ctx, path) => {
-					let config = getPath(rawOptions, path);
-					debugger;
-					if (config && config.ref && isTypedModel(config.ref)) {
-						debugger;
-						return new config.ref(val);
-					}
-					else if (config && Array.isArray(config) && config.length === 1 && isTypedModel(config[0].ref)) {
-						debugger;
-						return new config[0].ref(val);
-					}
-					return val;
-				});
+			if (name === 'rooms') {
+				debugger;
+			}
 
-				value._travesed = true;
+			// Sub-document support
+			if (isSubdocument(value)) {
+				addAccessor(value);
+			} else if (Array.isArray(value) && value.length > 0 && isSubdocument(value[0])) {
+				value.map(addAccessor);
 			}
 
 			if (value && SavedTypedModel) {
+				// if (value['_typedObject']) return value['_typedObject'];
+
 				if (Array.isArray(value)) {
-					return value.map(r => new SavedTypedModel(r));
+					return value.map(r => {
+						let typedObject = new SavedTypedModel(r);
+						// value['_typedObject'] = typedObject;
+						return typedObject;
+					});
 				} else {
-					return new SavedTypedModel(value);
+					let typedObject = new SavedTypedModel(value);
+					// value['_typedObject'] = typedObject;
+					return typedObject;
 				}
 			}
 
 			return value;
 		},
 		set(value: any) {
-			if (!this._document) {
-				return;
-			}
-
-			this._document[name] = value;
+			let doc = this._document || this._doc;
+			if (!doc) return;
+			doc[name] = value;
 		},
 	});
-
-	return options;
 }
