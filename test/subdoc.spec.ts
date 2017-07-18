@@ -38,7 +38,13 @@ describe('Sub-documents', () => {
 					g: 255,
 					b: 20
 				},
-				owner: wife._id
+				owner: wife._id,
+				windows: [{
+					installer: wife._id
+				}],
+				computer: {
+					users: [wife._id, husband._id]
+				}
 			}, {
 				name: 'bedroom 2',
 				color: {
@@ -46,7 +52,13 @@ describe('Sub-documents', () => {
 					g: 20,
 					b: 255
 				},
-				owner: husband._id
+				owner: husband._id,
+				windows: [{
+					installer: husband._id
+				}],
+				computer: {
+					users: [wife._id, husband._id]
+				}
 			}]
 		});
 		await house.save();
@@ -145,5 +157,73 @@ describe('Sub-documents', () => {
 
 		const newHouse = await House.findOne({ name: 'home' }).populate('car.users').exec() as House;
 		expect(newHouse.car.users[0].name).to.be.equal(newName);
+	});
+
+	it('should allow to populate in nested sub-document', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.windows.installer').exec() as House;
+		expect(house).to.be.not.undefined;
+		expect(house.rooms).to.be.not.undefined;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].windows[0].installer.document).to.be.not.undefined;
+		expect(house.rooms[0].windows[0].installer).to.be.not.undefined;
+		expect(house.rooms[0].windows[0].installer.name).to.be.equal('Wife');
+		expect(house.rooms[1].windows[0].installer.document).to.be.not.undefined;
+		expect(house.rooms[1].windows[0].installer).to.be.not.undefined;
+		expect(house.rooms[1].windows[0].installer.name).to.be.equal('Husband');
+	});
+
+	it('should allow to populate in nested sub-documents', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.computer.users').exec() as House;
+		expect(house).to.be.not.undefined;
+		expect(house.rooms).to.be.not.undefined;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].computer.users[0].document).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[0]).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[0].name).to.be.equal('Wife');
+		expect(house.rooms[0].computer.users[1].document).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[1]).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[1].name).to.be.equal('Husband');
+	});
+
+	it('should allow to modify in nested sub-document', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.windows.installer').exec() as House;
+		expect(house).to.be.not.undefined;
+		expect(house.rooms).to.be.not.undefined;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].windows[0].installer.document).to.be.not.undefined;
+		expect(house.rooms[0].windows[0].installer).to.be.not.undefined;
+		expect(house.rooms[0].windows[0].installer.name).to.be.equal('Wife');
+		expect(house.rooms[1].windows[0].installer.document).to.be.not.undefined;
+		expect(house.rooms[1].windows[0].installer).to.be.not.undefined;
+		expect(house.rooms[1].windows[0].installer.name).to.be.equal('Husband');
+
+		let newName = 'Modified wife';
+		house.rooms[0].windows[0].installer.name = newName;
+		await house.rooms[0].windows[0].installer.save();
+		expect(house.rooms[0].windows[0].installer.name).to.be.equal(newName);
+
+		const newHouse = await House.findOne({ name: 'home' }).populate('rooms.windows.installer').exec() as House;
+		expect(newHouse.rooms[0].windows[0].installer.name).to.be.equal(newName);
+	});
+
+	it('should allow to modify in nested sub-documents', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.computer.users').exec() as House;
+		expect(house).to.be.not.undefined;
+		expect(house.rooms).to.be.not.undefined;
+		expect(house.rooms.length).to.be.equal(2);
+		expect(house.rooms[0].computer.users[0].document).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[0]).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[0].name).to.be.equal('Wife');
+		expect(house.rooms[0].computer.users[1].document).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[1]).to.be.not.undefined;
+		expect(house.rooms[0].computer.users[1].name).to.be.equal('Husband');
+
+		let newName = 'Modified wife';
+		house.rooms[0].computer.users[0].name = newName;
+		await house.rooms[0].computer.users[0].save();
+		expect(house.rooms[0].computer.users[0].name).to.be.equal(newName);
+
+		const newHouse = await House.findOne({ name: 'home' }).populate('rooms.computer.users').exec() as House;
+		expect(newHouse.rooms[0].computer.users[0].name).to.be.equal(newName);
 	});
 });
