@@ -280,27 +280,27 @@ export class ValidateTest extends TypedModel {
 	})
 	public email4: string;
 
-	public static validateEmail1(value, object) {
+	public static validateEmail1(value) {
 		// Object is mapped to object
 		return ValidateTest.EMAIL_REGEX.test(value);
 	}
 
-	public static validateEmail2_1(value, object) {
+	public static validateEmail2_1(value) {
 		// Object is mapped to object
 		return value.length > 2;
 	}
 
-	public static validateEmail2_2(value, object) {
+	public static validateEmail2_2(value) {
 		// Object is mapped to object
 		return ValidateTest.EMAIL_REGEX.test(value);
 	}
 
-	public static validateEmail3(value, object) {
+	public static validateEmail3(value) {
 		// Object is mapped to object
 		return ValidateTest.EMAIL_REGEX.test(value);
 	}
 
-	public static validateEmail4(value, object, callback) {
+	public static validateEmail4(value, callback) {
 		// Object is mapped to object
 		// Support mongoose isAsync callback
 		let result = ValidateTest.EMAIL_REGEX.test(value);
