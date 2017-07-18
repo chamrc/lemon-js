@@ -125,7 +125,6 @@ function processSubDocument(meta: any, metaKey: string | number) {
 	let rawMeta = clone(meta);
 	delete meta.subdoc;
 
-	debugger;
 	meta = deepMapValues(meta, (val, key, ctx) => {
 		if (key === 'ref' && isTypedModel(val)) {
 			return val.name;
@@ -135,7 +134,6 @@ function processSubDocument(meta: any, metaKey: string | number) {
 		}
 		return val;
 	});
-	debugger;
 
 	let childSchema = new Schema(meta, isBoolean ? undefined : schemaOptions);
 	childSchema['_meta'] = meta;

@@ -76,7 +76,6 @@ function initializeModel(constructor: typeof TypedModel, options?: any) {
 		});
 	}
 
-
 	cls.initSchema();
 	cls._model = mongooseModel(name, cls._schema, pluralize(name.toLowerCase()));
 }
@@ -88,7 +87,7 @@ function initProp<T>(name: string, options: SchemaTypeOptions<T>, rawOptions: Sc
 }
 
 function isSubdocument(value) {
-	return Boolean(value._doc && value.constructor && value.constructor.name &&
+	return Boolean(value && value._doc && value.constructor && value.constructor.name &&
 		(value.constructor.name === 'SingleNested' || value.constructor.name === 'EmbeddedDocument'));
 }
 
@@ -124,10 +123,6 @@ function createAccessors<T>(name: string, options: SchemaTypeOptions<T>, rawOpti
 				SavedTypedModel = rawOptions[0].ref;
 			}
 
-			if (name === 'rooms') {
-				debugger;
-			}
-
 			// Sub-document support
 			if (isSubdocument(value)) {
 				addAccessor(value);
@@ -136,18 +131,12 @@ function createAccessors<T>(name: string, options: SchemaTypeOptions<T>, rawOpti
 			}
 
 			if (value && SavedTypedModel) {
-				// if (value['_typedObject']) return value['_typedObject'];
-
 				if (Array.isArray(value)) {
 					return value.map(r => {
-						let typedObject = new SavedTypedModel(r);
-						// value['_typedObject'] = typedObject;
-						return typedObject;
+						return new SavedTypedModel(r);
 					});
 				} else {
-					let typedObject = new SavedTypedModel(value);
-					// value['_typedObject'] = typedObject;
-					return typedObject;
+					return new SavedTypedModel(value);
 				}
 			}
 
