@@ -1,6 +1,6 @@
 {
 	"name": "lemon-js",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "Define your mongoose models easily with Typescript",
 	"main": "./dist/index.js",
 	"scripts": {

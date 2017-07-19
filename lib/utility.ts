@@ -280,22 +280,30 @@ export function isTypedModel(obj: any) {
  ************************************************/
 
 export function getPath(obj, path) {
-	if (typeof path === 'string') {
-		path = path.split('.');
+	if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+		return context[path];
 	}
 
-	if (!Array.isArray(path)) {
-		path = path.concat();
-	}
+	let parts = path.split(/\./g);
+	let result = context;
 
-	return path.reduce(function (o, part) {
-		let keys = part.match(/\[(.*?)\]/);
-		if (keys) {
-			let key = part.replace(keys[0], '');
-			return o && o[key] && o[key][keys[1]] ? o[key][keys[1]] : undefined;
+	for (let i = 0; i < parts.length; i++) {
+		let part = parts[i];
+		if (result === undefined) return undefined;
+		if (path.indexOf('[') === -1 && path.indexOf(']') === -1) result = result[part];
+		else {
+			let indexes = part.split(/\[|\]/g);
+			for (let j = 0; j < indexes.length; j++) {
+				let index = parseInt(indexes[j], 10);
+				if (isNaN(index)) continue;
+				if (!Array.isArray(result)) return undefined;
+				if (index < 0 || index >= result.length) return undefined;
+				result = result[index];
+			}
 		}
-		return o && o[part] ? o[part] : undefined;
-	}, obj);
+	}
+
+	return result;
 }
 
 /************************************************
