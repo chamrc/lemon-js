@@ -284,23 +284,21 @@ export function getPath(context, path) {
 		return context[path];
 	}
 
-	let parts = path.split(/\./g);
+	let parts = path.split(/\.|\]|(?=\[)/g);
 	let result = context;
 
 	for (let i = 0; i < parts.length; i++) {
 		let part = parts[i];
+
+		if (part.length === 0) continue;
 		if (result === undefined) return undefined;
-		if (path.indexOf('[') === -1 && path.indexOf(']') === -1) result = result[part];
-		else {
-			let indexes = part.split(/\[|\]/g);
-			for (let j = 0; j < indexes.length; j++) {
-				let index = parseInt(indexes[j], 10);
-				if (isNaN(index)) continue;
-				if (!Array.isArray(result)) return undefined;
-				if (index < 0 || index >= result.length) return undefined;
-				result = result[index];
-			}
+		if (part.startsWith('[')) {
+			part = parseInt(part.substring(1), 10);
+			if (!Array.isArray(result)) return undefined;
+			if (part < 0 || part >= result.length) return undefined;
 		}
+
+		result = result[part];
 	}
 
 	return result;
