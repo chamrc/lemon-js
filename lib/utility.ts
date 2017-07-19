@@ -279,7 +279,7 @@ export function isTypedModel(obj: any) {
  *
  ************************************************/
 
-export function getPath(obj, path) {
+export function getPath(context, path) {
 	if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
 		return context[path];
 	}
