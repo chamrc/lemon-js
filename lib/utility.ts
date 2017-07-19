@@ -275,7 +275,7 @@ export function isTypedModel(obj: any) {
 
 /************************************************
  *
- * Find by path
+ * Find by path & Set by path
  *
  ************************************************/
 
@@ -301,6 +301,49 @@ export function getPath(context, path) {
 		result = result[part];
 	}
 
+	return result;
+}
+
+export function setPath(context, path, value) {
+	let parts = path.split(/\.|\]|(?=\[)/g);
+	let result = context;
+	let newParts = [];
+	parts.forEach(val => {
+		if (val && val.length > 0) newParts.push(val);
+	});
+
+	return _setPath(context, newParts, value, 0);
+}
+
+function _setPath(context, parts, value, index) {
+	if (index < 0 || index >= parts.length) return undefined;
+
+	let part = parts[index];
+	let isArray = part.startsWith('[');
+	let key = isArray ? parseInt(part.substring(1), 10) : part;
+	let result = context;
+
+	if (isArray) {
+		result = result && Array.isArray(result) ? result : [];
+		let inRange = key >= 0 && key < result.length;
+
+		if (index === parts.length - 1) { // Replace
+			if (inRange) result[key] = value;
+			else result.push(value);
+		} else { // Push
+			let subCtx = _setPath(inRange ? result[key] : undefined, parts, value, index + 1);
+			if (inRange) result[key] = subCtx;
+			else result.push(subCtx);
+		}
+	} else {
+		result = result && !Array.isArray(result) && typeof result === 'object' ? result : {};
+		if (index === parts.length - 1) {
+			result[key] = value;
+		} else {
+			let subCtx = _setPath(result[key] ? result[key] : undefined, parts, value, index + 1);
+			result[key] = subCtx;
+		}
+	}
 	return result;
 }
 
