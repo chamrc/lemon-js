@@ -7,6 +7,7 @@ export interface TypeOptions<T> extends SchemaTypeOpts<T> {
 	ref?: Constructor;
 	refer?: Constructor;
 	subdoc?: boolean | SchemaOptions;
+	hidden?: boolean;
 }
 export type SchemaTypeOptions<T> = TypeOptions<T> | { [key: string]: any };
 
@@ -123,6 +124,7 @@ function processSubDocument(meta: any, metaKey: string | number) {
 
 	// Creates a raw metadata that stores TypedModel constructor instead of Collection Name.
 	let rawMeta = clone(meta);
+	meta = deepMapKeys(meta, (val, key) => key === 'hidden' ? undefined : key);
 	delete meta.subdoc;
 
 	meta = deepMapValues(meta, (val, key, ctx) => {
@@ -270,6 +272,9 @@ function processTypedModelsReferences(target, propertyKey: string, metadatas: Me
 	}
 
 	rawMeta = clone(meta);
+	meta = deepMapKeys(meta, (val, key) => key === 'hidden' ? undefined : key);
+	delete meta.subdoc;
+
 	meta = deepMapValues(meta, (val, key, ctx) => {
 		if (key === 'ref') {
 			if (Array.isArray(val) && val.length === 1 && isTypedModel(val[0]) && val[0].name) {

@@ -30,6 +30,7 @@ export interface IWindow {
 export interface IComputer {
 	color: IColor;
 	users: User[];
+	system: string;
 }
 
 export interface IHouse {
@@ -40,10 +41,14 @@ export interface IHouse {
 
 @model
 export class House extends TypedModel implements IHouse {
-	@property name: string;
+	@property({
+		hidden: true
+	})
+	name: string;
 
 	@property({
 		subdoc: true,
+		hidden: ['make'],
 		make: String,
 		model: String,
 		color: {
@@ -56,21 +61,31 @@ export class House extends TypedModel implements IHouse {
 	car: ICar;
 
 	@property([{
-		subdoc: true,
+		subdoc: { autoIndex: false },
+		hidden: ['owner'],
 		name: String,
 		color: {
+			hidden: ['r'],
 			r: Number,
 			g: Number,
 			b: Number
 		},
 		owner: { refer: User },
 		windows: [{
+			hidden: true,
 			subdoc: true,
 			installer: { ref: User }
 		}],
 		computer: {
+			hidden: ['users'],
 			subdoc: true,
-			users: [{ ref: User }]
+			users: [{ ref: User }],
+			system: String,
+			color: {
+				r: Number,
+				g: Number,
+				b: Number
+			}
 		}
 	}])
 	rooms: IRoom[];

@@ -5,7 +5,11 @@ import { model, property, Query, TypedModel } from '../../';
 export class User extends TypedModel {
 	@property public age: number;
 	@property({ index: true }) public email: string;
-	@property([{ refer: Permission }]) public permissions: [Permission];
+	@property([{
+		refer: Permission,
+		hidden: true
+	}])
+	public permissions: [Permission];
 	@property({ default: false }) public isActive: boolean;
 	@property({ unique: true }) public name: string;
 

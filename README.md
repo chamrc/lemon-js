@@ -14,7 +14,7 @@ Install with [npm](https://npmjs.org/package/lemon-js):
 ### Define models
 
 ```typescript
-import { Model, model, property } from 'lemon-js';
+import { TypedModel, model, property } from 'lemon-js';
 
 @model
 export class Permission extends TypedModel {
@@ -328,6 +328,70 @@ let creationDate = user.createdAt;
 // Updated date
 let updateDate = user.updatedAt;
 ```
+
+### Hiding fields from toJSON() and toObject()
+```typescript
+@model
+export class House extends TypedModel implements IHouse {
+	@property({
+		hidden: true
+	})
+	name: string;
+
+	@property({
+		subdoc: true,
+		hidden: ['make'],
+		make: String,
+		model: String,
+		color: {
+			r: Number,
+			g: Number,
+			b: Number
+		},
+		users: [{ ref: User }]
+	})
+	car: ICar;
+
+	@property([{
+		subdoc: { autoIndex: false },
+		hidden: ['owner'],
+		name: String,
+		color: {
+			hidden: ['r'],
+			r: Number,
+			g: Number,
+			b: Number
+		},
+		owner: { refer: User },
+		windows: [{
+			hidden: true,
+			subdoc: true,
+			installer: { ref: User }
+		}],
+		computer: {
+			hidden: ['users'],
+			subdoc: true,
+			users: [{ ref: User }],
+			system: String,
+			color: {
+				r: Number,
+				g: Number,
+				b: Number
+			}
+		}
+	}])
+	rooms: IRoom[];
+}
+```
+
+You can overwrite this when you run toJSON or toObject with the following option (default false).
+```typescript
+const house: House = await House.findOne({ name: 'home' }).populate('rooms.computer').exec() as House;
+const json = house.toJSON({
+	showHidden: true
+})
+```
+
 
 ## License
 

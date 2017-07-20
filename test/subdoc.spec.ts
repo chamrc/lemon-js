@@ -43,7 +43,13 @@ describe('Sub-documents', () => {
 					installer: wife._id
 				}],
 				computer: {
-					users: [wife._id, husband._id]
+					users: [wife._id, husband._id],
+					system: 'macOS Sierra',
+					color: {
+						r: 255,
+						g: 255,
+						b: 255
+					}
 				}
 			}, {
 				name: 'bedroom 2',
@@ -57,7 +63,13 @@ describe('Sub-documents', () => {
 					installer: husband._id
 				}],
 				computer: {
-					users: [wife._id, husband._id]
+					users: [wife._id, husband._id],
+					system: 'Windows 10',
+					color: {
+						r: 0,
+						g: 0,
+						b: 0
+					}
 				}
 			}]
 		});
@@ -225,5 +237,15 @@ describe('Sub-documents', () => {
 
 		const newHouse = await House.findOne({ name: 'home' }).populate('rooms.computer.users').exec() as House;
 		expect(newHouse.rooms[0].computer.users[0].name).to.be.equal(newName);
+	});
+
+	it('should hide fields in subdoc', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.computer').exec() as House;
+		const json: any = house.toJSON();
+		expect(json.name).to.be.undefined;
+		expect(json.car.make).to.be.undefined;
+		expect(json.rooms[0].color.r).to.be.undefined;
+		expect(json.rooms[0].windows.length).to.be.equal(0);
+		expect(json.rooms[0].computer.users).to.be.undefined;
 	});
 });

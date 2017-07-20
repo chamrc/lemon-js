@@ -179,7 +179,7 @@ function mapKeysTopDown(obj, deepMapper, fn, path = '') {
 	return Object.keys(obj).reduce(
 		(res, key) => {
 			let newKey = fn(obj[key], key, obj, joinPath(path, key, obj));
-			res[newKey ? newKey : key] = deepMapper(obj[key], key, obj);
+			if (newKey) res[newKey] = deepMapper(obj[key], key, obj);
 			return res;
 		}, {}
 	);
@@ -204,7 +204,7 @@ function mapKeysBottomUp(obj, deepMapper, fn, path = '') {
 		(res, key) => {
 			let result = deepMapper(obj[key], key, obj);
 			let newKey = fn(obj[key], key, obj, joinPath(path, key, obj));
-			res[newKey ? newKey : key] = result;
+			if (newKey) res[newKey] = result;
 			return res;
 		}, {}
 	);
@@ -264,7 +264,15 @@ export function objectFromData(key, value) {
  *
  ************************************************/
 
-function isObject(value) {
+export function isObjectID(value) {
+	return value && value.constructor && value.constructor.name === 'ObjectID';
+}
+
+export function isObjectType(value) {
+	return value && value.constructor && value.constructor.name === 'Object';
+}
+
+export function isObject(value) {
 	const type = typeof value;
 	return value != null && (type === 'object' || type === 'function');
 }

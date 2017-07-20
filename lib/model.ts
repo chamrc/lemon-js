@@ -13,6 +13,8 @@ import {
 	ValidationError
 } from 'mongoose';
 
+import { getPath, isObjectID, isObjectType } from '.';
+
 export interface IModelType<T extends TypedModel> {
 	new(model?: Document): T;
 }
@@ -20,6 +22,10 @@ export interface IModelType<T extends TypedModel> {
 export interface IMeta {
 	properties: any;
 	schemaOptions: any;
+}
+
+export interface ToObjectOptions extends DocumentToObjectOptions {
+	showHidden: boolean;
 }
 
 export type ModelMapReduceOption<T, Key, Value> = ModelMapReduceOption<T, Key, Value>;
@@ -558,8 +564,15 @@ export class TypedModel {
 	 * options to every document of your schema by default, set your schemas
 	 * toJSON option to the same argument.
 	 */
-	public toJSON(options?: DocumentToObjectOptions): object {
-		return this._document.toJSON(options);
+	public toJSON(options?: ToObjectOptions): object {
+		let showHidden = options && options.showHidden || false;
+		if (options) delete options.showHidden;
+
+		let obj = this._document.toJSON(options);
+		let meta = getPath(this, 'constructor._meta.rawProperties');
+
+		if (!showHidden && meta) return this.deleteHidden(obj, meta);
+		else return obj;
 	}
 
 	/**
@@ -567,8 +580,15 @@ export class TypedModel {
 	 * in MongoDB. Buffers are converted to instances of mongodb.Binary for
 	 * proper storage.
 	 */
-	public toObject(options?: DocumentToObjectOptions): object {
-		return this._document.toObject(options);
+	public toObject(options?: ToObjectOptions): object {
+		let showHidden = options.showHidden || false;
+		if (options) delete options.showHidden;
+
+		let obj = this._document.toObject(options);
+		let meta = getPath(this, 'constructor._meta.rawProperties');
+
+		if (!showHidden && meta) return this.deleteHidden(obj, meta);
+		else return obj;
 	}
 
 	/**
@@ -644,5 +664,83 @@ export class TypedModel {
 	protected fromQuery(document: Document): this {
 		const Model = this.constructor as any;
 		return new Model(document);
+	}
+
+	/**
+	 * Delete hidden value from obj
+	 * @param obj
+	 * @param meta
+	 */
+	private deleteHidden(obj: any, meta: any): object {
+		if (isObjectType(obj)) {
+			if (meta && meta.hidden) {
+				return this.deleteKeysInObject(obj, meta);
+			} else {
+				return Object.keys(obj).reduce((newObj, key) => {
+					let value = obj[key], metadata = meta[key];
+					if (metadata && Array.isArray(metadata) && metadata.length === 1 && Array.isArray(value)) {
+						let result = value.reduce((arr, item) => {
+							let delObj = this.deleteHidden(item, metadata[0]);
+							if (delObj) arr.push(delObj);
+							return arr;
+						}, []);
+						if (result) newObj[key] = result;
+					} else if (metadata && metadata.hidden) {
+						if (Array.isArray(metadata.hidden) && isObjectType(value)) {
+							let result = this.deleteKeysInObject(value, metadata);
+							if (result) newObj[key] = result;
+						} else {
+							// Ignore the file because metadata is true.
+						}
+					} else {
+						newObj[key] = value;
+					}
+					return newObj;
+				}, {});
+			}
+		} else {
+			return obj;
+		}
+	}
+
+	private deleteKeysInObject(obj, meta) {
+		if (meta && meta.hidden && typeof meta.hidden === 'boolean') return undefined;
+
+		if (meta) {
+			if (isObjectType(obj)) {
+				if (Array.isArray(meta.hidden)) {
+					meta.hidden.forEach((key, idx) => {
+						delete obj[key];
+					});
+				}
+
+				let mapper = (object, metadata) => {
+					if (isObjectID(object)) {
+						if (!metadata) return object.toString();
+						else object = object.toString();
+					}
+
+					if (metadata) {
+						if (Array.isArray(metadata) && metadata.length === 1 && Array.isArray(object))
+							return object.reduce((arr, val) => {
+								let delObj = mapper(val, metadata[0]);
+								if (delObj) arr.push(delObj);
+								return arr;
+							}, []);
+						else if (isObjectType(object))
+							return this.deleteHidden(object, metadata);
+					}
+
+					return object;
+				};
+
+				return Object.keys(obj).reduce((newObj, key) => {
+					newObj[key] = mapper(obj[key], meta[key]);
+					return newObj;
+				}, {});
+			}
+		}
+
+		return obj;
 	}
 }
