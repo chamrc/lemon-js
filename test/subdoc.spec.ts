@@ -248,4 +248,16 @@ describe('Sub-documents', () => {
 		expect(json.rooms[0].windows.length).to.be.equal(0);
 		expect(json.rooms[0].computer.users).to.be.undefined;
 	});
+
+	it('should overwrite hiding fields in subdoc', async () => {
+		const house: House = await House.findOne({ name: 'home' }).populate('rooms.computer').exec() as House;
+		const json: any = house.toJSON({
+			showHidden: true
+		});
+		expect(json.name).to.be.not.undefined;
+		expect(json.car.make).to.be.not.undefined;
+		expect(json.rooms[0].color.r).to.be.not.undefined;
+		expect(json.rooms[0].windows.length).to.be.not.equal(0);
+		expect(json.rooms[0].computer.users).to.be.not.undefined;
+	});
 });
